@@ -1,0 +1,4 @@
+future
+six
+smbus2
+RPi.GPIO
