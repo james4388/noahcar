@@ -23,7 +23,6 @@ class Front_Wheels(Component):
     def __init__(self, debug=False, db="config", bus_number=1,
                  channel=FRONT_WHEEL_CHANNEL):
         ''' setup channels and basic stuff '''
-        self.db = None
         self._channel = channel
         self._straight_angle = 90
         self.turning_max = 20
