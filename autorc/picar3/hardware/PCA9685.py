@@ -158,8 +158,7 @@ class PWM(BusModule):
 
     def write_all_value(self, on, off):
         '''Set on and off value on all channel'''
-        if self._DEBUG:
-            print(self._DEBUG_INFO, 'Set all channel to value "%d"' % (off))
+        self.log('Set all channel to value "%d"' % (off))
         self._write_byte_data(self._ALL_LED_ON_L, on & 0xFF)
         self._write_byte_data(self._ALL_LED_ON_H, on >> 8)
         self._write_byte_data(self._ALL_LED_OFF_L, off & 0xFF)

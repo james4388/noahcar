@@ -1,4 +1,5 @@
 from __future__ import print_function
+import logging
 
 import smbus2 as smbus
 
@@ -9,32 +10,22 @@ class Component(object):
     ''' Base class for component '''
     _DEBUG = False
     _DEBUG_INFO = 'DEBUG "Component":'
+    logger = None
 
     def __init__(self, debug=False, *args, **kwargs):
+        if 'logger' in kwargs:
+            self.logger = kwargs.pop('logger')
+        if not self.logger:
+            self.logger = logging.getLogger(self.__class__.__name__)
         self._DEBUG = debug
 
-    def log(self, *args):
+    def log(self, *args, **kwargs):
         ''' Print debug info '''
-        if self._DEBUG:
-            print(self._DEBUG_INFO, *args)
+        self.logger.log(*args, **kwargs)
 
-    @property
-    def debug(self):
-        return self._DEBUG
-
-    @debug.setter
-    def debug(self, debug):
-        '''Set if debug information shows'''
-        if debug in (True, False):
-            self._DEBUG = debug
-        else:
-            raise ValueError('debug must be "True" (Set debug on) or "False"'
-                             ' (Set debug off), not "{0}"'.format(debug))
-
-        if self._DEBUG:
-            print(self._DEBUG_INFO, "Set debug on")
-        else:
-            print(self._DEBUG_INFO, "Set debug off")
+    def debug(self, *args, **kwargs):
+        ''' Print debug info '''
+        self.logger.debug(*args, **kwargs)
 
 
 class BusModule(Component):
