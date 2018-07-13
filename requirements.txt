@@ -3,3 +3,9 @@ six
 smbus2
 RPi.GPIO
 numpy
+cchardet
+aiohttp
+jinja2
+aiohttp_jinja2
+aiohttp_session[secure]
+cryptography

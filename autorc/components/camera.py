@@ -9,8 +9,9 @@ class WebCam(Component):
     ''' USB webcam interface '''
     def __init__(self, size=(160, 120), framerate=20):
         self.cam = cv2.VideoCapture(0)
-        self.cam.set(cv2.CAP_PROP_FRAME_WIDTH, size[0])
-        self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT, size[1])
+        if size:
+            self.cam.set(cv2.CAP_PROP_FRAME_WIDTH, size[0])
+            self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT, size[1])
         self.framerate = framerate
 
     def process(self, *args, **kwargs):
