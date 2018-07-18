@@ -1,0 +1,44 @@
+{
+    "name": "autorc-controller-ui",
+    "version": "1.0.0",
+    "description": "Controller",
+    "main": "app.js",
+    "scripts": {
+        "build": "./node_modules/.bin/webpack --mode=production --config webpack.config.js",
+        "dev": "./node_modules/.bin/webpack --watch --mode=development --config webpack.config.js"
+    },
+    "keywords": [],
+    "author": "",
+    "dependencies": {
+        "babel": "^6.23.0",
+        "babel-cli": "^6.26.0",
+        "babel-loader": "^7.1.5",
+        "babel-plugin-transform-object-rest-spread": "^6.26.0",
+        "babel-preset-env": "^1.7.0",
+        "babel-preset-react": "^6.24.1",
+        "css-loader": "^1.0.0",
+        "immutable": "^3.8.2",
+        "node-sass": "^4.9.0",
+        "react": "^16.4.1",
+        "react-dom": "^16.4.1",
+        "react-redux": "^5.0.7",
+        "redux": "^4.0.0",
+        "redux-immutable": "^4.0.0",
+        "redux-thunk": "^2.3.0",
+        "sass-loader": "^7.0.1",
+        "style-loader": "^0.21.0",
+        "url-loader": "^1.0.1",
+        "webpack": "^4.16.0",
+        "webpack-cli": "^3.0.8",
+        "webpack-dev-server": "^3.1.4"
+    },
+    "babel": {
+        "presets": [
+            "env",
+            "react"
+        ],
+        "plugins": [
+            "transform-object-rest-spread"
+        ]
+    }
+}

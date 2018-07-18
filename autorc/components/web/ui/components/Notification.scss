@@ -1,0 +1,21 @@
+.notification {
+    width: 100%;
+    position: relative;
+
+    .btn-close {
+        position: absolute;
+        right: 0px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        width: 20px;
+        text-align: center;
+    }
+
+    .noti-list {
+        width: 100%;
+        position: absolute;
+        list-style: none;
+        padding-left: 0;
+    }
+}

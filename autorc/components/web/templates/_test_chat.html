@@ -1,0 +1,137 @@
+{% extends "base.html" %} {% block content %} Session Key: {{key}}
+<div id="main" class="row">
+    <img src="/static/images/loading.svg" />
+</div>
+<div id="test-chat">
+    <button id="connect">Connect</button>
+    <br/>
+    <div id="log" style="width: 500px; border: 1px solid black; max-height: 400px; overflow-y: auto">
+    </div>
+    <div>
+        <input type="text" id="message"><button id="send">Send</button>
+        <button id="autosend">Autosend</button>
+    </div>
+    <div>
+        Online users:
+        <ul id="online-users">
+        </ul>
+    </div>
+</div>
+{% endblock %}
+{% block footer %}
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+<script>
+    // Test websocket
+    $(function() {
+        let ws = null;
+        let users = [];
+        let logger = $('#log');
+
+        function log(msg) {
+            let date = new Date();
+            let date_prompt = '(' + date.toISOString().split('T')[1].slice(0, 8) + ') ';
+            let item = $('<div class="message"></div>');
+            item.text(`${msg}. ${date_prompt}`);
+            logger.append(item);
+            logger.scrollTop(logger.scrollTop() + 1000);
+        }
+
+        function disconnect() {
+            if (ws != null) {
+                log('Disconnecting...');
+                try {
+                    ws.close();
+                } catch (ex) {
+                    log(`Error when disconnect ${ex}`);
+                }
+                ws = null;
+                update_ui();
+            }
+        }
+
+        function connect() {
+            disconnect();
+            let protocol = window.location.protocol == 'https:' ? 'wss://' : 'ws://';
+            let wsUri = `${protocol}${window.location.host}/ws`;
+            ws = new WebSocket(wsUri);
+            log('Connecting...');
+            ws.onopen = function() {
+                log('Connected.');
+                update_ui();
+            };
+            ws.onmessage = function(e) {
+                console.log(e);
+                let data = JSON.parse(e.data);
+                switch (data.action) {
+                    case 'connect':
+                        name = data.user.name;
+                        log(name + ' is connected');
+                        users = data.users;
+                        update_ui();
+                        break;
+                    case 'disconnect':
+                        name = data.user.name;
+                        log('Disconnected ' + name);
+                        users = data.users;
+                        update_ui();
+                        break;
+                    case 'chat':
+                        log(data.user.name + ': ' + data.message);
+                        break;
+                }
+            };
+            ws.onclose = function() {
+                log('Disconnected.');
+                ws = null;
+                update_ui();
+            };
+        }
+
+        function update_ui() {
+            if (ws !== null) {
+                $('#connect').text('Disconnect');
+            } else {
+                $('#connect').text('Connect');
+            }
+            $('#online-users').html('');
+            for(let i = 0; i < users.length; i++) {
+                $('#online-users').append(`<li>${users[i].name} (${users[i].id})</li>`);
+            }
+        }
+
+        $('#connect').on('click', function() {
+            if (ws == null) {
+                connect();
+            } else {
+                disconnect();
+            }
+            update_ui();
+            return false;
+        });
+
+        $('#send').on('click', function(){
+            let msg = $('#message').val();
+            if (ws) {
+                ws.send(JSON.stringify({'action': 'chat', 'message': msg}));
+                $('#message').val('');
+            }
+        });
+
+        $('#autosend').on('click', function(){
+            let isenable = $(this).data('enable', false);
+            if (isenable) {
+                $(this).text('Stop');
+            } else {
+                $(this).text('Autosend');
+            }
+        });
+
+        $('#message').on('keyup', function(e){
+            if (e.keyCode === 13) {
+                $('#send').click();
+            }
+        });
+    });
+</script>
+{% endblock %}
