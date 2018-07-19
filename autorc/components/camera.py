@@ -2,7 +2,7 @@ import cv2
 import time
 from datetime import datetime
 
-from base import Component
+from autorc.components.base import Component
 
 
 class WebCam(Component):

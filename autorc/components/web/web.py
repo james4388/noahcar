@@ -6,15 +6,16 @@ import jinja2
 import json
 import os
 import uuid
-
 from aiohttp_session import get_session, setup as setup_session
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
+
+from autorc.config import config, Config
 
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SESSION_KEY = 'session_key'
+CONSTANTS = Config(config_file=os.path.join(BASE_DIR, 'constants.json'))
 
 
 class Views:
@@ -23,10 +24,10 @@ class Views:
     @aiohttp_jinja2.template('index.html')
     async def index(self, request):
         session = await get_session(request)
-        if SESSION_KEY not in session:
-            session[SESSION_KEY] = str(uuid.uuid4())
-        logger.debug('Session KEY %s', session[SESSION_KEY])
-        return {'key': session[SESSION_KEY]}
+        if config.SESSION_KEY not in session:
+            session[config.SESSION_KEY] = str(uuid.uuid4())
+        logger.debug('Session KEY %s', session[config.SESSION_KEY])
+        return {'key': session[config.SESSION_KEY]}
 
 
 class SocketController:
@@ -84,7 +85,7 @@ class SocketController:
         if not reconnect:
             # Broadcast goodbye message
             await self.broadcast({
-                'action': 'disconnect',
+                'action': CONSTANTS.USER_DISCONNECT,
                 'user': self.user_json(user),
                 'users': [
                     self.user_json(user)
@@ -113,7 +114,7 @@ class SocketController:
 
         # Broadcast welcome message
         await self.broadcast({
-            'action': 'connect',
+            'action': CONSTANTS.USER_CONNECT,
             'user': self.user_json(user),
             'users': [
                 self.user_json(user) for user in self.app[self.USERS].values()
@@ -129,17 +130,26 @@ class SocketController:
                 logger.debug('Message is an invalid JSON')
                 print(data)
                 return
-            if data.get('action') == 'chat':
+            action = data.get('action')
+            if action == CONSTANTS.SEND_MESSAGE_REQUEST:
                 await self.broadcast({
-                    'action': 'chat',
+                    'action': CONSTANTS.SEND_MESSAGE_RESPONSE,
                     'user': self.user_json(user),
                     'message': data.get('message')
                 })
-            elif data.get('action') == 'rename':
+            elif action == CONSTANTS.RENAME_REQUEST:
                 user['name'] = data.get('value')
                 await self.broadcast({
-                    'action': 'rename',
+                    'action': CONSTANTS.RENAME_RESPONSE,
                     'user': self.user_json(user),
+                    'users': [
+                        self.user_json(user)
+                        for user in self.app[self.USERS].values()
+                    ]
+                })
+            elif action == CONSTANTS.USER_LIST_REQUEST:
+                await self.send({
+                    'action': CONSTANTS.USER_LIST_RESPONSE,
                     'users': [
                         self.user_json(user)
                         for user in self.app[self.USERS].values()
@@ -157,11 +167,11 @@ class SocketController:
 
         # Get session
         session = await get_session(request)
-        if SESSION_KEY not in session:
+        if config.SESSION_KEY not in session:
             await ws.close(code=WSCloseCode.POLICY_VIOLATION,
                            message=b'Please access using index page')
             raise web.HTTPFound('/')
-        _id = session[SESSION_KEY]
+        _id = session[config.SESSION_KEY]
 
         user = await self.add_user(ws, _id)
 
@@ -178,8 +188,6 @@ class SocketController:
 
 
 class WebController():
-    SECRET_KEY = b'Very secret KEY, keep safe !@#%*'
-
     def config_router(self, router, app):
         views = Views()
         sc = SocketController(app)
@@ -195,7 +203,11 @@ class WebController():
             os.path.join(BASE_DIR, 'templates')))
 
         self.config_router(app.router, app)
-        setup_session(app, EncryptedCookieStorage(self.SECRET_KEY))
+        secret = config.WEB_CONTROLLER_SECRET_KEY
+        if isinstance(secret, str):
+            secret = secret.encode('utf-8')
+        setup_session(
+            app, EncryptedCookieStorage(secret))
 
         self.app = app
         self.ioloop = ioloop
@@ -217,5 +229,12 @@ class WebController():
         subprocess.run(["npm", "run", "build", "--prefix", UI_BASE])
 
     def runserver(self):
-        self.collect_static()
-        web.run_app(self.create_server())
+        if config.WEB_CONTROLLER_COLLECT_STATIC:
+            self.collect_static()
+        web.run_app(self.create_server(), host=config.WEB_CONTROLLER_HOST,
+                    port=config.WEB_CONTROLLER_PORT)
+
+
+if __name__ == '__main__':
+    wc = WebController()
+    wc.runserver()

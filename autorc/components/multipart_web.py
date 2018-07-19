@@ -1,7 +1,8 @@
 import asyncio
 import cv2
 from aiohttp import web, MultipartWriter
-from camera import WebCam
+
+from autorc.components.camera import WebCam
 
 
 async def mjpeg_handler(request):

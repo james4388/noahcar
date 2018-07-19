@@ -64,6 +64,7 @@ export function connect(wsUri, reconnect=false) {
                 return;
             }
             const { action, ...payload } = data;
+            console.log('Got mess froms srv', action, payload);
             dispatch({type: action, payload});
         };
         // TODO handle websocket error https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
@@ -95,12 +96,11 @@ export function connect(wsUri, reconnect=false) {
 
 export function emit(action, data) {
     // Send data to server via websocket
-    return (dispatch, getState) => {
-        if (ws !== null) {
-            ws.send(JSON.stringify({
-                ...data,
-                'action': action,
-            }));
-        }
+    console.log(ws)
+    if (ws !== null) {
+        ws.send(JSON.stringify({
+            ...data,
+            'action': action,
+        }));
     }
 }

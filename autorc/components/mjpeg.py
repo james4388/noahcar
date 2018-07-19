@@ -1,8 +1,9 @@
 import asyncio
 import cv2
 from aiohttp import web
-from camera import WebCam
 from concurrent.futures import ProcessPoolExecutor
+
+from autorc.components.camera import WebCam
 
 
 class MjpegStreamer():
@@ -77,7 +78,7 @@ async def start_server(loop, address, port, webcam):
 
 
 if __name__ == '__main__':
-    wc = WebCam()
+    wc = WebCam(size=(640, 480))
     loop = asyncio.get_event_loop()
     loop.run_until_complete(start_server(loop, '0.0.0.0', 8888, wc))
     print("Server ready!")
