@@ -1,13 +1,20 @@
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
-import { bindActionCreators } from 'redux'
+import React, { Component } from 'react';
+import { List, Map } from 'immutable';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 import { clearNotification, showNotification } from 'actions/notification';
 import { sendMessage } from 'actions/chat';
 import Notification from 'components/Notification';
+import Joystick from 'components/Joystick';
+
+require('./MainApp.scss');
 
 class MainApp extends Component {
     constructor(props) {
         super(props);
+
+        this.throttleOptions = new Map({lockY: true, color: 'red'});
+        this.steeringOptions = new Map({lockX: true, color: 'green'});
     }
 
     render() {
@@ -22,8 +29,18 @@ class MainApp extends Component {
                 <div className="col-sm-8">Stats</div>
             </div>
             <div className="controller row">
-                <div className="col">Throttle</div>
-                <div className="col">Stearing</div>
+                <div className="col joystick-col">
+                    <Joystick
+                        options={this.throttleOptions}
+                        onChange={console.log}
+                        placeHolder="Touch for throttle"/>
+                </div>
+                <div className="col joystick-col">
+                    <Joystick
+                        options={this.steeringOptions}
+                        onChange={console.log}
+                        placeHolder="Touch for steering"/>
+                </div>
             </div>
         </div>
     }
