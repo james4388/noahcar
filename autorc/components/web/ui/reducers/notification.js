@@ -1,5 +1,5 @@
 import Immutable, {List, Map} from 'immutable';
-import * as constants from '../../constants.json';
+import * as constants from 'constants';
 
 export function notifications(state = new List(), action) {
     switch (action.type) {

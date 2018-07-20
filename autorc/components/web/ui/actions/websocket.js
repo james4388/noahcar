@@ -1,8 +1,9 @@
 /* Handle websocket connection, auto reconnect on connection error
    Convert all socket data to actions
 */
-import * as constants from '../../constants.json';
-import { showNotification } from './notification';
+import * as constants from 'constants';
+import { rangeMap } from 'utils';
+import { showNotification } from 'actions/notification';
 
 let ws = null;
 

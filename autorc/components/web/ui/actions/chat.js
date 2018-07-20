@@ -1,6 +1,6 @@
-import * as constants from '../../constants.json';
+import * as constants from 'constants';
 
-export function chat(message) {
+export function sendMessage(message) {
     return (dispatch, getState, {emit}) => {
         console.log(constants.SEND_MESSAGE_REQUEST, {message});
         console.log(emit);

@@ -28,7 +28,14 @@ let config = {
         ]
     },
     resolve: {
-        extensions: ['.js', '.jsx']
+        extensions: ['.js', '.jsx'],
+        alias: {
+            constants$: path.resolve(__dirname, '../constants.json')
+        },
+        modules: [
+            path.resolve(__dirname),
+            'node_modules',
+        ]
     }
 }
 

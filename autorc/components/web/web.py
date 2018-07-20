@@ -155,6 +155,14 @@ class SocketController:
                         for user in self.app[self.USERS].values()
                     ]
                 })
+            elif action == CONSTANTS.VEHICLE_PARAMETER_REQUEST:
+                ''' Current vehicle params '''
+                await self.send({
+                    'action': CONSTANTS.VEHICLE_PARAMETER_RESPONSE,
+                    'vehicle_stats': {
+                        'MAX_SPEED': config.MAX_SPEED
+                    }
+                })
 
     async def handler(self, request):
         ws = web.WebSocketResponse(heartbeat=1.0, timeout=1.0, autoping=True,

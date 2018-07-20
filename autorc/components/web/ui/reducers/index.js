@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux-immutable'
-import { notifications } from './notification';
-import { websocket } from './websocket';
-import { chat } from './chat';
+import { notifications } from 'reducers/notification';
+import { websocket } from 'reducers/websocket';
+import { chat } from 'reducers/chat';
 
 export default combineReducers({
     notifications,

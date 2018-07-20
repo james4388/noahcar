@@ -1,4 +1,4 @@
-import * as constants from '../../constants.json'
+import * as constants from 'constants';
 
 let notiTimeout = null;
 

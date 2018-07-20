@@ -4,10 +4,10 @@ import { Provider } from 'react-redux';
 import { List, Map } from 'immutable';
 import { createStore, applyMiddleware } from 'redux';
 import thunkMiddleware from 'redux-thunk';
-import rootReducer from './reducers'
-import { connect as wsConnect, emit } from './actions/websocket';
-import MainApp from './containers/MainApp';
-import * as constants from '../constants.json';
+import rootReducer from 'reducers'
+import { connect as wsConnect, emit } from 'actions/websocket';
+import MainApp from 'containers/MainApp';
+import * as constants from 'constants';
 const { WS_STATUS } = constants;
 
 const initialState = new Map({

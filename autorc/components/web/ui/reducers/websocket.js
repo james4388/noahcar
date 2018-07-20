@@ -1,5 +1,5 @@
 import Immutable, { Map } from 'immutable';
-import * as constants from '../../constants.json';
+import * as constants from 'constants';
 const { WS_STATUS } = constants;
 
 export function websocket(state=new Map(), action) {
