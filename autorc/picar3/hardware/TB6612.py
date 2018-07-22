@@ -59,7 +59,7 @@ class Motor(Component):
         if not callable(self._pwm):
             raise ValueError('pwm is not callable, please set Motor.pwm to a '
                              'pwm control function with only 1 veriable speed')
-        self.log('Set speed to:', speed)
+        self.log('Set speed to %d:', speed)
         self._speed = speed
         self._pwm(self._speed)
 

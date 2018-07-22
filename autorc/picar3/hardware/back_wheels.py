@@ -31,8 +31,8 @@ class Back_Wheels(Component):
         self.forward_A = True
         self.forward_B = True
 
-        self.forward_A = 1
-        self.forward_B = 1
+        self.forward_A = 0
+        self.forward_B = 0
 
         self.left_wheel = TB6612.Motor(self.Motor_A, offset=self.forward_A)
         self.right_wheel = TB6612.Motor(self.Motor_B, offset=self.forward_B)
@@ -86,7 +86,7 @@ class Back_Wheels(Component):
         ''' Set moving speeds '''
         self.left_wheel.speed = self._speed
         self.right_wheel.speed = self._speed
-        self.log('Set speed to', self._speed)
+        self.log('Set speed to %d', self._speed)
 
     def ready(self):
         ''' Get the back wheels to the ready position. (stop) '''
