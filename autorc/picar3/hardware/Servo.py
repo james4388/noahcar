@@ -11,8 +11,8 @@
 **********************************************************************
 '''
 
-from .base import Component
-from . import PCA9685
+from base import Component
+import PCA9685
 
 
 class Servo(Component):
@@ -27,6 +27,7 @@ class Servo(Component):
     def __init__(self, channel, offset=0, lock=True, bus_number=None,
                  address=0x40):
         ''' Init a servo on specific channel, this offset '''
+        super(Servo, self).__init__()
         if channel < 0 or channel > 16:
             raise ValueError(
                 'Servo channel "{0}" is not in (0, 15).'.format(channel))

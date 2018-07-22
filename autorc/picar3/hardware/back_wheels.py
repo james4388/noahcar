@@ -11,9 +11,9 @@
 **********************************************************************
 '''
 
-from . import TB6612
-from . import PCA9685
-from .base import Component
+import TB6612
+import PCA9685
+from base import Component
 
 
 class Back_Wheels(Component):

@@ -13,7 +13,7 @@ from __future__ import print_function
 import time
 import math
 
-from .base import BusModule
+from base import BusModule
 
 
 class PWM(BusModule):

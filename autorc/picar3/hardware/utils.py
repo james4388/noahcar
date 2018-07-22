@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from . import constants
+import constants
 
 
 def get_pi_revision():

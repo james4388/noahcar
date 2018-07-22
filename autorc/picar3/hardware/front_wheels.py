@@ -10,8 +10,8 @@
 *               Cavon    2016-11-04    fix for submodules
 **********************************************************************
 '''
-from . import Servo
-from .base import Component
+import Servo
+from base import Component
 
 
 class Front_Wheels(Component):
@@ -23,6 +23,7 @@ class Front_Wheels(Component):
     def __init__(self, debug=False, db="config", bus_number=1,
                  channel=FRONT_WHEEL_CHANNEL):
         ''' setup channels and basic stuff '''
+        super(Front_Wheels, self).__init__()
         self._channel = channel
         self._straight_angle = 90
         self.turning_max = 20

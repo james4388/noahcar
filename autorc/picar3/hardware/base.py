@@ -33,6 +33,7 @@ class BusModule(Component):
     _DEBUG_INFO = 'DEBUG "BusComponent":'
 
     def __init__(self, bus_number=None, address=None, debug=False):
+        super(BusModule, self).__init__()
         self._DEBUG = debug
         self.address = address
         if bus_number is None:

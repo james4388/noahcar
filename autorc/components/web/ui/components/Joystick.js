@@ -3,7 +3,6 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { List, Map } from 'immutable';
 import { create as createNipple } from 'nipplejs';
-import { rangeMap } from 'utils';
 
 require('./Joystick.scss');
 
@@ -19,7 +18,6 @@ export default class Joystick extends PureComponent {
 
     handleChange(evt, data) {
         if(typeof(this.props.onChange) === 'function') {
-            // distance  = size / 2;
             this.props.onChange(data);
         }
         return true;
@@ -47,6 +45,7 @@ export default class Joystick extends PureComponent {
                 'multitouch': false,
                 'size': options.get('size', 200),
                 'maxNumberOfNipples': 1,
+                'threshold': 0,
                 'position': options.get('position', {
                     top: '50%', left: '50%'}),
             });
@@ -79,9 +78,11 @@ export default class Joystick extends PureComponent {
     }
 
     render() {
-        const { placeHolder } = this.props;
+        const { placeHolder, children } = this.props;
         return <div className="joystick" ref={el => this.nippleZone = el}>
-            {placeHolder ? <span className="placeHolder">{placeHolder}</span> : null}
+            {placeHolder ?
+                <span className="placeHolder">{placeHolder}</span>
+            : children}
         </div>
     }
 }

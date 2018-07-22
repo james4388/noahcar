@@ -2,6 +2,7 @@
     position: relative;
     min-height: 400px;
     border: 1px dashed gray;
+    user-select: none;
 
     .placeHolder {
         position: absolute;

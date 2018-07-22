@@ -11,7 +11,7 @@
 '''
 import RPi.GPIO as GPIO
 
-from .base import Component
+from base import Component
 
 
 class Motor(Component):
@@ -28,6 +28,7 @@ class Motor(Component):
     _DEBUG_INFO = 'DEBUG "TB6612":'
 
     def __init__(self, direction_channel, pwm=None, offset=True):
+        super(Motor, self).__init__()
         '''Init a motor on giving direction. channel and PWM channel.'''
         self.direction_channel = direction_channel
         self._pwm = pwm

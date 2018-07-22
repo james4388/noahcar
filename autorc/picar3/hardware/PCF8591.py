@@ -9,7 +9,7 @@
 * Update      : Dream    2016-09-19    New release
 **********************************************************************
 '''
-from .base import BusModule
+from base import BusModule
 
 
 class PCF8591(BusModule):
