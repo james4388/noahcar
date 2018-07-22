@@ -21,11 +21,17 @@ class Component(object):
 
     def log(self, msg, *args, **kwargs):
         ''' Print debug info '''
-        self.logger.info(msg, *args, **kwargs)
+        if self.logger:
+            self.logger.info(msg, *args, **kwargs)
+        else:
+            print(msg)
 
     def debug(self, msg, *args, **kwargs):
         ''' Print debug info '''
-        self.logger.debug(msg, *args, **kwargs)
+        if self.logger:
+            self.logger.debug(msg, *args, **kwargs)
+        else:
+            print(msg)
 
 
 class BusModule(Component):
