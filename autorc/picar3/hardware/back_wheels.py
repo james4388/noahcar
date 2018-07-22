@@ -11,9 +11,9 @@
 **********************************************************************
 '''
 
-import TB6612
-import PCA9685
-from base import Component
+from autorc.picar3.hardware import TB6612
+from autorc.picar3.hardwareimport import PCA9685
+from autorc.picar3.hardware.base import Component
 
 
 class Back_Wheels(Component):

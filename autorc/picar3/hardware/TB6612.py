@@ -11,7 +11,7 @@
 '''
 import RPi.GPIO as GPIO
 
-from base import Component
+from autorc.picar3.hardware.base import Component
 
 
 class Motor(Component):

@@ -3,7 +3,7 @@ import logging
 
 import smbus2 as smbus
 
-from utils import get_bus_number, get_pi_revision
+from autorc.picar3.hardware.utils import get_bus_number, get_pi_revision
 
 
 class Component(object):

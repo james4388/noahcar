@@ -17,6 +17,17 @@ logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONSTANTS = Config(config_file=os.path.join(BASE_DIR, 'constants.json'))
 
+# Test car
+from autorc.utils import range_map
+from autorc.picar3.hardware import PCA9685
+pwm = PCA9685.PWM(bus_number=1)
+pwm.setup()
+pwm.frequency = 60
+from autorc.picar3.hardware.front_wheels import Front_Wheels
+fw = Front_Wheels()
+from autorc.picar3.hardware.back_wheels import Back_Wheels
+bw = Back_Wheels()
+
 
 class Views:
 
@@ -163,6 +174,19 @@ class SocketController:
                         'MAX_SPEED': config.MAX_SPEED
                     }
                 })
+            elif action == CONSTANTS.VEHICLE_STEER:
+                fw.turn(range_map(data.value, -1, 1, 70, 110, int_only=True))
+            elif action == CONSTANTS.VEHICLE_THROTTLE:
+                if data.value > 0:
+                    bw.speed = range_map(
+                        data.value, 0, 1, 50, 100, int_only=True)
+                    bw.forward()
+                elif data.value < 0:
+                    bw.speed = range_map(
+                        -data.value, 0, 1, 50, 100, int_only=True)
+                    bw.backward()
+                else:
+                    bw.stop()
 
     async def handler(self, request):
         ws = web.WebSocketResponse(heartbeat=1.0, timeout=1.0, autoping=True,

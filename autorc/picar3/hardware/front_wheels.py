@@ -10,8 +10,8 @@
 *               Cavon    2016-11-04    fix for submodules
 **********************************************************************
 '''
-import Servo
-from base import Component
+from autorc.picar3.hardware import Servo
+from autorc.picar3.hardware.base import Component
 
 
 class Front_Wheels(Component):

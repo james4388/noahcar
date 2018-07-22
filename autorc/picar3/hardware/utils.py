@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-import constants
+from autorc.picar3.hardware import constants
 
 
 def get_pi_revision():
