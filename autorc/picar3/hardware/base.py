@@ -3,7 +3,7 @@ import logging
 
 import smbus2 as smbus
 
-from .utils import get_bus_number
+from utils import get_bus_number, get_pi_revision
 
 
 class Component(object):
@@ -37,6 +37,6 @@ class BusModule(Component):
         self._DEBUG = debug
         self.address = address
         if bus_number is None:
-            bus_number = get_bus_number()
+            bus_number = get_bus_number(get_pi_revision())
         self.bus_number = bus_number
         self.bus = smbus.SMBus(self.bus_number)
