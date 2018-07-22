@@ -19,13 +19,13 @@ class Component(object):
             self.logger = logging.getLogger(self.__class__.__name__)
         self._DEBUG = debug
 
-    def log(self, *args, **kwargs):
+    def log(self, msg, *args, **kwargs):
         ''' Print debug info '''
-        self.logger.log(*args, **kwargs)
+        self.logger.log(msg, *args, **kwargs)
 
-    def debug(self, *args, **kwargs):
+    def debug(self, msg, *args, **kwargs):
         ''' Print debug info '''
-        self.logger.debug(*args, **kwargs)
+        self.logger.debug(msg, *args, **kwargs)
 
 
 class BusModule(Component):
