@@ -178,7 +178,7 @@ class SocketController:
                 steering_percent = data.get('value', 0)
                 steering = range_map(
                     steering_percent, -1, 1, 70, 110, int_only=True)
-                logger.log('Steer %d', steering)
+                logger.info('Steer %d', steering)
                 fw.turn(steering)
             elif action == CONSTANTS.VEHICLE_THROTTLE:
                 throttle_percent = data.get('value', 0)
@@ -187,13 +187,13 @@ class SocketController:
                 bw.speed = throttle
                 if throttle_percent > 0:
                     bw.forward()
-                    logger.log('Forward %d', throttle)
+                    logger.info('Forward %d', throttle)
                 elif throttle_percent < 0:
                     bw.backward()
-                    logger.log('Backward %d', throttle)
+                    logger.info('Backward %d', throttle)
                 else:
                     bw.stop()
-                    logger.log('Stop')
+                    logger.info('Stop')
 
     async def handler(self, request):
         ws = web.WebSocketResponse(heartbeat=1.0, timeout=1.0, autoping=True,
