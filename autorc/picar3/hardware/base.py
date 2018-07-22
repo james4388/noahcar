@@ -21,7 +21,7 @@ class Component(object):
 
     def log(self, msg, *args, **kwargs):
         ''' Print debug info '''
-        self.logger.log(msg, *args, **kwargs)
+        self.logger.info(msg, *args, **kwargs)
 
     def debug(self, msg, *args, **kwargs):
         ''' Print debug info '''
