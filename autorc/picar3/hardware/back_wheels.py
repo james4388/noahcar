@@ -12,7 +12,7 @@
 '''
 
 from autorc.picar3.hardware import TB6612
-from autorc.picar3.hardwareimport import PCA9685
+from autorc.picar3.hardware import PCA9685
 from autorc.picar3.hardware.base import Component
 
 
