@@ -3,6 +3,7 @@ import { List, Map } from 'immutable';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { clearNotification, showNotification } from 'actions/notification';
+import { steering, throttle } from 'actions/vehicle';
 import { sendMessage } from 'actions/chat';
 import Notification from 'components/Notification';
 import JoystickController from 'components/JoystickController';
@@ -23,10 +24,12 @@ class MainApp extends Component {
 
     steer(val) {
         this.setState({steering: 360 * val});
+        this.props.actions.vehicle.steering(val);
     }
 
     throttle(val) {
         this.setState({throttle: val});
+        this.props.actions.vehicle.throttle(val);
     }
 
     render() {
@@ -65,7 +68,8 @@ function mapDispatchToProps(dispatch) {
             'notifications': bindActionCreators({
                 clearNotification, showNotification
             }, dispatch),
-            'chat': bindActionCreators({sendMessage}, dispatch)
+            'chat': bindActionCreators({sendMessage}, dispatch),
+            'vehicle': bindActionCreators({steering, throttle}, dispatch)
         }
     }
 }

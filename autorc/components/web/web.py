@@ -10,6 +10,7 @@ from aiohttp_session import get_session, setup as setup_session
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 from autorc.config import config, Config
+from autorc.utils import range_map
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -18,7 +19,6 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONSTANTS = Config(config_file=os.path.join(BASE_DIR, 'constants.json'))
 
 # Test car
-from autorc.utils import range_map
 from autorc.picar3.hardware import PCA9685
 pwm = PCA9685.PWM(bus_number=1)
 pwm.setup()
@@ -166,27 +166,34 @@ class SocketController:
                         for user in self.app[self.USERS].values()
                     ]
                 })
-            elif action == CONSTANTS.VEHICLE_PARAMETER_REQUEST:
+            elif action == CONSTANTS.VEHICLE_STATS_REQUEST:
                 ''' Current vehicle params '''
                 await self.send({
-                    'action': CONSTANTS.VEHICLE_PARAMETER_RESPONSE,
+                    'action': CONSTANTS.VEHICLE_STATS_RESPONSE,
                     'vehicle_stats': {
                         'MAX_SPEED': config.MAX_SPEED
                     }
                 })
             elif action == CONSTANTS.VEHICLE_STEER:
-                fw.turn(range_map(data.value, -1, 1, 70, 110, int_only=True))
+                steering_percent = data.get('value', 0)
+                steering = range_map(
+                    steering_percent, -1, 1, 70, 110, int_only=True)
+                logger.log('Steer %d', steering)
+                fw.turn(steering)
             elif action == CONSTANTS.VEHICLE_THROTTLE:
-                if data.value > 0:
-                    bw.speed = range_map(
-                        data.value, 0, 1, 50, 100, int_only=True)
+                throttle_percent = data.get('value', 0)
+                throttle = range_map(
+                    abs(throttle_percent), 0, 1, 50, 100, int_only=True)
+                bw.speed = throttle
+                if throttle_percent > 0:
                     bw.forward()
-                elif data.value < 0:
-                    bw.speed = range_map(
-                        -data.value, 0, 1, 50, 100, int_only=True)
+                    logger.log('Forward %d', throttle)
+                elif throttle_percent < 0:
                     bw.backward()
+                    logger.log('Backward %d', throttle)
                 else:
                     bw.stop()
+                    logger.log('Stop')
 
     async def handler(self, request):
         ws = web.WebSocketResponse(heartbeat=1.0, timeout=1.0, autoping=True,
