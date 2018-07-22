@@ -134,5 +134,5 @@ JoystickController.propTypes = {
 
 JoystickController.defaultProps = {
     updateDelay: 100,
-    size: 200,
+    size: 150,
 }

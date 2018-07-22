@@ -61,7 +61,7 @@ class Front_Wheels(Component):
 
     def turn(self, angle):
         ''' Turn the front wheels to the giving angle '''
-        self.log("Turn to", angle)
+        self.log("Turn to %d", angle)
         if angle < self._angle["left"]:
             angle = self._angle["left"]
         if angle > self._angle["right"]:

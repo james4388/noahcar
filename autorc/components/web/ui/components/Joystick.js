@@ -43,7 +43,7 @@ export default class Joystick extends PureComponent {
                 'color': options.get('color', 'red'),
                 'mode': options.get('mode', 'dynamic'),
                 'multitouch': false,
-                'size': options.get('size', 200),
+                'size': options.get('size', 150),
                 'maxNumberOfNipples': 1,
                 'threshold': 0,
                 'position': options.get('position', {
