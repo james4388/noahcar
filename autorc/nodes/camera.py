@@ -2,10 +2,10 @@ import cv2
 import time
 from datetime import datetime
 
-from autorc.components.base import Component
+from autorc.nodes import Node
 
 
-class WebCam(Component):
+class WebCam(Node):
     ''' USB webcam interface '''
     def __init__(self, size=(160, 120), framerate=20):
         self.cam = cv2.VideoCapture(0)
