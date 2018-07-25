@@ -138,7 +138,8 @@ class PGWebCam(BaseWebCam):
         if self.cam and self.cam.query_image():
             self.surface = self.cam.get_image(self.blank_surface)
             # Since pygame cam switch width and height, we have to flip back
-            self.surface = self.pygame.transform.rotate(self.surface, 90)
+            self.surface = self.pygame.transform.rotate(
+                self.pygame.transform.flip(self.surface, True, False), 90)
             # need resize?
             # pygame.transform.scale(self.surface, self.size)
             return self.pygame.surfarray.pixels3d(self.surface)
