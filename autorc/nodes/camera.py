@@ -60,7 +60,7 @@ class CVWebCam(BaseWebCam):
         self.capture_device = capture_device
         self.jpeg_quality = jpeg_quality
 
-    def on_start_up(self):
+    def start_up(self):
         import cv2
         self.cv2 = cv2
         self.cam = cv2.VideoCapture(self.capture_device)
@@ -109,7 +109,7 @@ class PGWebCam(BaseWebCam):
         self.capture_device = capture_device
         self.jpeg_quality = jpeg_quality
 
-    def on_start_up(self):
+    def start_up(self):
         import pygame
         import pygame.camera
         import pygame.image
@@ -117,11 +117,12 @@ class PGWebCam(BaseWebCam):
         from PIL import Image
         self.pygame = pygame
         self.Image = Image
-        # pygame.init()
+        pygame.init()
         pygame.camera.init()
         try:
             if not self.capture_device:
                 cam_list = pygame.camera.list_cameras()
+                self.logger.debug(cam_list)
                 self.cam = pygame.camera.Camera(cam_list[0], self.size, "RGB")
             else:
                 self.cam = pygame.camera.Camera(
@@ -130,10 +131,11 @@ class PGWebCam(BaseWebCam):
         except Exception as e:
             raise Exception('Camera init error')
         self.surface = pygame.surface.Surface(self.size)    # To store image
+        time.sleep(1)   # Camera warm up
 
     def get_frame(self):
         if self.cam and self.cam.query_image():
-            self.surface = self.cam.get_image(self.snapshot)
+            self.surface = self.cam.get_image(self.surface)
             # need resize?
             # pygame.transform.scale(self.surface, self.size)
             # widh and height switch?
@@ -150,3 +152,7 @@ class PGWebCam(BaseWebCam):
     def get_np_array(self, frame):
         scaled = self.pygame.transform.scale(self.surface, self.numpy_size)
         return self.pygame.surfarray.pixels3d(scaled)
+
+    def shutdown(self):
+        if self.cam:
+            self.cam.stop()

@@ -89,7 +89,7 @@ class Node(object):
         ''' This method is call by main loop to update data '''
         pass
 
-    def on_start_up(self):
+    def start_up(self):
         pass
 
     # Overwrite as you own risk
@@ -99,7 +99,7 @@ class Node(object):
                 'Node base class has not been propper init. '
                 'Call super() from %s.__init__' % self.__class__.__name__)
         self.logger.info('Process %s started!' % self.__class__.__name__)
-        self.on_start_up()
+        self.start_up()
         loop_count = 0
         max_sleep_time = 1.0 / self.__process_rate
         while not stop_event.is_set():  # Listen for stop event
