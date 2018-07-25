@@ -5,7 +5,7 @@ __version__ = '0.1'
 
 
 __all__ = (
-    'Node',
+    'Node'
 )
 
 
@@ -25,22 +25,30 @@ class Node(object):
     __input_timestamps = None       # Cache last input timestamp for updated
     __output = None                 # Output cache
     __init = False
+    __max_loop = None               # Use for testing, exit process after loops
+    __process_rate = 24             # process loop should be call per second
 
-    def __init__(self, context, input_callback: dict=None, **kwargs):
-        self.logger = logging.getLogger(__name__)
+    def __init__(self, context, input_callback: dict=None, process_rate=24,
+                 max_loop=None, **kwargs):
         super(Node, self).__init__()
+        self.logger = logging.getLogger(__name__)
+        self.__max_loop = max_loop
         self.context = context
         self.__input_timestamps = {}
         if (input_callback):
             self.__input_callback = input_callback
         # Convert callback name to class method
-        for cb in self.__input_callback.keys():
-            cb_method = getattr(self, cb, None)
-            if not callable(cb_method):
-                raise Exception('Callback %s does not existed in %s' % (
-                    cb, self.__class__.__name__))
-            self.__input_callback[cb_method] = self.__input_callback[cb]
-            del self.__input_callback[cb]
+        if self.__input_callback:
+            for cb, inputs in list(self.__input_callback.items()):
+                if not isinstance(inputs, (list, tuple)):
+                    inputs = (inputs, )
+                if isinstance(cb, str):
+                    cb_method = getattr(self, cb, None)
+                    if not callable(cb_method):
+                        raise Exception('Callback %s does not existed in %s' %
+                                        (cb, self.__class__.__name__))
+                    self.__input_callback[cb_method] = inputs
+                    del self.__input_callback[cb]
         self.__init = True
 
     def make_timestamp_key(self, key):
@@ -81,21 +89,38 @@ class Node(object):
         ''' This method is call by main loop to update data '''
         pass
 
+    def on_start_up(self):
+        pass
+
     # Overwrite as you own risk
     def start(self, stop_event, *args):
         if not self.__init:
             raise Exception(
                 'Node base class has not been propper init. '
                 'Call super() from %s.__init__' % self.__class__.__name__)
-        self.logger.debug('Process %s started!' % self.__class__.__name__)
+        self.logger.info('Process %s started!' % self.__class__.__name__)
+        self.on_start_up()
+        loop_count = 0
+        max_sleep_time = 1.0 / self.__process_rate
         while not stop_event.is_set():  # Listen for stop event
+            start_time = time.time()
             # Check and call callback on input updated
-            for callback, inputs in self.__input_callback.items():
-                if self.input_updated(inputs):
-                    cbargs = [self.context.get(input) for input in inputs]
-                    callback(*cbargs)
+            if self.__input_callback:
+                for callback, inputs in self.__input_callback.items():
+                    if self.input_updated(inputs):
+                        cbargs = [self.context.get(input) for input in inputs]
+                        callback(*cbargs)
 
             self.process_loop(*args)
+            loop_count += 1
+
+            if self.__max_loop and self.__max_loop <= loop_count:
+                self.logger.info('Max loop exceeded, Exit')
+                break
+
+            sleep_time = max_sleep_time - (time.time() - start_time)
+            if sleep_time > 0:
+                time.sleep(sleep_time)
 
         if callable(getattr(self, 'shutdown', None)):
             self.shutdown()
@@ -103,4 +128,7 @@ class Node(object):
 
     def shutdown(self):
         ''' Free all resource '''
+        self.logger.info('Shutting down.')
         self.output = None
+        self.__input_callback = None
+        self.__input_timestamps = None

@@ -10,3 +10,4 @@ aiohttp_jinja2
 aiohttp_session[secure]
 cryptography
 pygame
+Pillow
