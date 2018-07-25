@@ -1,31 +1,47 @@
 import asyncio
-import cv2
 from aiohttp import web
-from concurrent.futures import ProcessPoolExecutor
 
-from autorc.components.camera import WebCam
+from autorc.nodes import Node
 
 
-class MjpegStreamer():
-    def __init__(self, webcam, loop):
-        self.wc = webcam
+class MjpegStreamer(Node):
+    ''' Stand alone mjpeg streamer '''
+    def __init__(self, context, host='0.0.0.0', port=8888, **kwargs):
+        super(MjpegStreamer, self).__init__(context, input_callback={
+            'on_jpeg_frame': 'cam/image-jpeg'
+        }, **kwargs)
+        self.ctx = context
+        self.host = host
+        self.port = port
+        self.is_run = True
+        self.frame = None
+
+    def start_up(self):
+        # return
+        loop = asyncio.get_event_loop()
         self.loop = loop
+        app = web.Application(logger=self.logger)
+        self.app = app
+        app.router.add_route('GET', "/", self.index)
+        app.router.add_route('GET', "/image", self.handler)
+        print("Server ready!")
+        # This will be hold until finish
+        web.run_app(app, host=self.host, port=self.port)
 
-    async def get_image_frame(self):
-        frame = self.wc.process()
-        if frame is not None:
-            encode_param = (int(cv2.IMWRITE_JPEG_QUALITY), 90)
-            # Should not spawn ProcessPoolExecutor everytime like this
-            result, encimg = await loop.run_in_executor(
-                ProcessPoolExecutor(),
-                cv2.imencode, '.jpg', frame, encode_param)
-            return encimg.tostring()
-        return None
+    def shutdown(self):
+        self.is_run = False
+        self.app.shutdown()
+
+    def on_jpeg_frame(self, jpeg_frame):
+        print('New frame', len(self.context.get('cam/image-jpeg')))
+        self.frame = jpeg_frame
+
+    async def index(self, request):
+        return web.Response(
+            text='<img src="/image"/>', content_type='text/html')
 
     async def handler(self, request):
-        if not self.wc:
-            return web.Response(status=404, text='Webcam not found')
-        print('Client connected', request.raw_headers)
+        self.logger.info('Client connected %s', request.raw_headers)
         boundary = "boundarydonotcross"
         response = web.StreamResponse(status=200, reason='OK', headers={
             'Content-Type': 'multipart/x-mixed-replace; '
@@ -34,19 +50,22 @@ class MjpegStreamer():
         })
         try:
             await response.prepare(request)
-            while True:
-                data = await self.get_image_frame()
-                if data is not None:
+            frame = None
+            while self.is_run:
+                while self.is_run and not self.input_updated('cam/image-jpeg'):
+                    await asyncio.sleep(0.01)
+                frame = self.ctx.get('cam/image-jpeg')
+                if frame is not None:
                     try:
                         # Write header
                         await response.write(
                             '--{}\r\n'.format(boundary).encode('utf-8'))
                         await response.write(b'Content-Type: image/jpeg\r\n')
                         await response.write('Content-Length: {}\r\n'.format(
-                                len(data)).encode('utf-8'))
+                                len(frame)).encode('utf-8'))
                         await response.write(b"\r\n")
                         # Write data
-                        await response.write(data)
+                        await response.write(frame)
                         await response.write(b"\r\n")
                         await response.drain()
                     except ConnectionResetError as ex:
@@ -63,28 +82,3 @@ class MjpegStreamer():
             if response is not None:
                 await response.write_eof()
         return response
-
-
-async def index(request):
-    return web.Response(text='<img src="/image"/>', content_type='text/html')
-
-
-async def start_server(loop, address, port, webcam):
-    app = web.Application(loop=loop)
-    mjpeg = MjpegStreamer(webcam, loop)
-    app.router.add_route('GET', "/", index)
-    app.router.add_route('GET', "/image", mjpeg.handler)
-    return await loop.create_server(app.make_handler(), address, port)
-
-
-if __name__ == '__main__':
-    wc = WebCam(size=(640, 480))
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(start_server(loop, '0.0.0.0', 8888, wc))
-    print("Server ready!")
-
-    try:
-        loop.run_forever()
-    except KeyboardInterrupt:
-        print("Shutting Down!")
-        loop.close()

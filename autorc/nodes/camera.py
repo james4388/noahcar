@@ -138,9 +138,9 @@ class PGWebCam(BaseWebCam):
             self.surface = self.cam.get_image(self.surface)
             # need resize?
             # pygame.transform.scale(self.surface, self.size)
-            # widh and height switch?
-            # imgdata.swapaxes(0,1)
-            return self.pygame.surfarray.pixels3d(self.surface)
+            nparr = self.pygame.surfarray.pixels3d(self.surface)
+            # Since pygame cam switch width and height, we have to flip back
+            return nparr.swapaxes(0, 1)
 
     def get_jpeg(self, frame):
         if frame is not None:
@@ -151,7 +151,8 @@ class PGWebCam(BaseWebCam):
 
     def get_np_array(self, frame):
         scaled = self.pygame.transform.scale(self.surface, self.numpy_size)
-        return self.pygame.surfarray.pixels3d(scaled)
+        arr = self.pygame.surfarray.pixels3d(scaled)
+        return arr.swapaxes(0, 1)
 
     def shutdown(self):
         if self.cam:
