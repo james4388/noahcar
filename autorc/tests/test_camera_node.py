@@ -54,8 +54,8 @@ class CVNodeTestCase(unittest.TestCase):
             super(CVNodeTestCase, self).run(result)
             stop_event.set()
 
-    def test_capture_10_image(self):
-        for i in range(10):
+    def test_capture_image(self):
+        for i in range(4):
             self.assertEqual(
                 self.context.get('test_frame_%d' % (i + 1)), 'VALID')
             self.assertEqual(
