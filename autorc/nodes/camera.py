@@ -130,15 +130,13 @@ class PGWebCam(BaseWebCam):
             self.cam.start()
         except Exception as e:
             raise Exception('Camera init error')
+        self.blank_surface = pygame.surface.Surface(self.size)
         self.surface = None    # To store image
         time.sleep(1)   # Camera warm up
 
     def get_frame(self):
         if self.cam and self.cam.query_image():
-            if self.surface:
-                self.surface = self.cam.get_image(self.surface)
-            else:
-                self.surface = self.cam.get_image()
+            self.surface = self.cam.get_image(self.blank_surface)
             # Since pygame cam switch width and height, we have to flip back
             self.surface = self.pygame.transform.rotate(self.surface, 90)
             # need resize?
