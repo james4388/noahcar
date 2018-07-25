@@ -31,7 +31,7 @@ class Node(object):
     def __init__(self, context, input_callback: dict=None, process_rate=24,
                  max_loop=None, **kwargs):
         super(Node, self).__init__()
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.__max_loop = max_loop
         self.context = context
         self.__input_timestamps = {}
