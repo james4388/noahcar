@@ -135,7 +135,10 @@ class PGWebCam(BaseWebCam):
 
     def get_frame(self):
         if self.cam and self.cam.query_image():
-            self.surface = self.cam.get_image(self.surface)
+            if self.surface:
+                self.surface = self.cam.get_image(self.surface)
+            else:
+                self.surface = self.cam.get_image()
             # Since pygame cam switch width and height, we have to flip back
             self.surface = self.pygame.transform.rotate(self.surface, 90)
             # need resize?
