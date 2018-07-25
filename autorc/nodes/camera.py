@@ -12,7 +12,7 @@ class BaseWebCam(Node):
     OUT_PUT_JPEG = 'cam/image-jpeg'
     OUT_PUT_NUMPY = 'cam/image-np'
 
-    def __init__(self, context, size=(640, 480), framerate=20,
+    def __init__(self, context, size=(160, 120), framerate=20,
                  numpy_size=(64, 64), **kwargs):
         '''
             size for raw record and jpeg stream size
@@ -50,7 +50,7 @@ class CVWebCam(BaseWebCam):
     '''
     cam = None      # open CV cam instance
 
-    def __init__(self, context, size=(640, 480), framerate=20,
+    def __init__(self, context, size=(160, 120), framerate=20,
                  numpy_size=(64, 64), capture_device=0, jpeg_quality=90,
                  use_rgb=True, **kwargs):
         super(CVWebCam, self).__init__(context, size=size, framerate=framerate,
@@ -99,7 +99,7 @@ class PGWebCam(BaseWebCam):
     '''
         USB webcam interface using Pygame
     '''
-    def __init__(self, context, size=(640, 480), framerate=20,
+    def __init__(self, context, size=(160, 120), framerate=20,
                  numpy_size=(64, 64), capture_device=None, jpeg_quality=90,
                  use_bgr=False, **kwargs):
         super(PGWebCam, self).__init__(context, size=size, framerate=framerate,
@@ -136,11 +136,11 @@ class PGWebCam(BaseWebCam):
     def get_frame(self):
         if self.cam and self.cam.query_image():
             self.surface = self.cam.get_image(self.surface)
+            # Since pygame cam switch width and height, we have to flip back
+            self.surface = self.pygame.transform.rotate(self.surface, 90)
             # need resize?
             # pygame.transform.scale(self.surface, self.size)
-            nparr = self.pygame.surfarray.pixels3d(self.surface)
-            # Since pygame cam switch width and height, we have to flip back
-            return nparr.swapaxes(0, 1)
+            return self.pygame.surfarray.pixels3d(self.surface)
 
     def get_jpeg(self, frame):
         if frame is not None:
@@ -151,8 +151,7 @@ class PGWebCam(BaseWebCam):
 
     def get_np_array(self, frame):
         scaled = self.pygame.transform.scale(self.surface, self.numpy_size)
-        arr = self.pygame.surfarray.pixels3d(scaled)
-        return arr.swapaxes(0, 1)
+        return self.pygame.surfarray.pixels3d(scaled)
 
     def shutdown(self):
         if self.cam:
