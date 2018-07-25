@@ -73,7 +73,6 @@ class CVWebCam(BaseWebCam):
     def get_frame(self):
         if self.cam:
             ret, frame = self.cam.read()
-            self.logger.info(ret)
             return frame
 
     def get_jpeg(self, frame):

@@ -44,10 +44,10 @@ class CVNodeTestCase(unittest.TestCase):
             cam_node = self.camera_class(context, max_loop=10)
             p_cam = Process(target=cam_node.start, args=(stop_event, ))
             p_test = Process(target=test_node.start, args=(stop_event, ))
-            p_cam.daemon = True
-            p_cam.start()
             p_test.daemon = True
             p_test.start()
+            p_cam.daemon = True
+            p_cam.start()
             p_cam.join()
             self.manager = manager
             self.context = context
