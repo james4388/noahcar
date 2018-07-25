@@ -130,7 +130,7 @@ class PGWebCam(BaseWebCam):
             self.cam.start()
         except Exception as e:
             raise Exception('Camera init error')
-        self.surface = pygame.surface.Surface(self.size)    # To store image
+        self.surface = None    # To store image
         time.sleep(1)   # Camera warm up
 
     def get_frame(self):
