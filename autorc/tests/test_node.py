@@ -7,7 +7,7 @@ from autorc.nodes import Node
 
 class TestNode(Node):
     def __init__(self, context):
-        super(TestNode, self).__init__(context, {
+        super(TestNode, self).__init__(context, input_callback={
             'on_key1_change': 'key1',
             'on_key23_change': ('key2', 'key3'),
             'on_np_arr': 'keynp'

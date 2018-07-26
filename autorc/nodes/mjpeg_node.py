@@ -2,10 +2,10 @@ import asyncio
 import time
 from aiohttp import web
 
-from autorc.nodes import AsyncNode
+from autorc.nodes import Node
 
 
-class MjpegStreamer(AsyncNode):
+class MjpegStreamer(Node):
     ''' Stand alone mjpeg streamer (for testing only) '''
     def __init__(self, context, input_key='cam/image-jpeg', host='0.0.0.0',
                  port=8888, frame_rate=24, **kwargs):
@@ -16,23 +16,18 @@ class MjpegStreamer(AsyncNode):
         self.is_run = True
         self.frame_rate = frame_rate
 
-    async def start_up(self):
+    def start(self, stop_event, *args):
         app = web.Application(logger=self.logger)
         self.app = app
         app.router.add_route('GET', "/", self.index)
         app.router.add_route('GET', "/image", self.handler)
-        # Blocking run
-        # web.run_app(app, host=self.host, port=self.port)
-        self.runner = web.AppRunner(app)
-        await self.runner.setup()
-        site = web.TCPSite(self.runner, host=self.host, port=self.port)
-        await site.start()
+        # Find away to check for stop_event
+        web.run_app(app, host=self.host, port=self.port)
+        self.shutdown()
 
-    async def shutdown(self):
-        super(MjpegStreamer, self).shutdown()
+    def shutdown(self):
         self.is_run = False
-        await self.app.shutdown()
-        await self.runner.cleanup()
+        self.app.shutdown()
 
     async def index(self, request):
         return web.Response(

@@ -13,6 +13,7 @@ class CVNodeTestCase(unittest.TestCase):
         with Manager() as manager:
             context = manager.dict()
             stop_event = Event()
+            self.stop_event = stop_event
             cam_node = self.camera_class(context)
             p_cam = Process(target=cam_node.start, args=(stop_event, ))
             p_cam.daemon = True
@@ -29,7 +30,9 @@ class CVNodeTestCase(unittest.TestCase):
     def test_run_mjpeg_server(self):
         while True:
             try:
-                time.sleep(1)
+                time.sleep(20)
+                self.stop_event.set()
+                break
             except KeyboardInterrupt:
                 break
 
