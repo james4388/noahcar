@@ -104,8 +104,8 @@ export default class JoystickController extends PureComponent {
     }
 
     render() {
-        return <div className="controller row">
-            <div className="col joystick-col">
+        return <div className="joystick-controller">
+            <div className="left joystick-col">
                 <Joystick
                     options={this.throttleOptions}
                     onStart={this.beginThrottle}
@@ -113,7 +113,7 @@ export default class JoystickController extends PureComponent {
                     onEnd={this.endThrottle}
                     placeHolder="Touch for throttle"/>
             </div>
-            <div className="col joystick-col">
+            <div className="right joystick-col">
                 <Joystick
                     options={this.steeringOptions}
                     onStart={this.beginSteering}

@@ -138,6 +138,8 @@ class AsyncNode(Node):
     ''' Just like Node but using async io '''
     def __init__(self, context, *, loop=None, **kwargs):
         super(AsyncNode, self).__init__(context, **kwargs)
+        # TODO enforce callback as coroutine function
+        # asyncio.iscoroutinefunction(callback)
         self.loop = loop
 
     async def process_loop(self, *args):
@@ -157,7 +159,7 @@ class AsyncNode(Node):
                 for callback, inputs in self.input_callback.items():
                     if self.input_updated(inputs):
                         cbargs = [self.context.get(input) for input in inputs]
-                        callback(*cbargs)
+                        await callback(*cbargs)
 
             await self.process_loop(*args)
             loop_count += 1

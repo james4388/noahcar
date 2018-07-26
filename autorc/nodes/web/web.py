@@ -11,6 +11,8 @@ from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 from autorc.config import config, Config
 from autorc.utils import range_map
+from autorc.nodes import AsyncNode
+from autorc.nodes.mjpeg import MjpegStreamer
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -18,18 +20,8 @@ logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONSTANTS = Config(config_file=os.path.join(BASE_DIR, 'constants.json'))
 
-# Test car
-from autorc.picar3.hardware import PCA9685
-pwm = PCA9685.PWM(bus_number=1)
-pwm.setup()
-pwm.frequency = 60
-from autorc.picar3.hardware.front_wheels import Front_Wheels
-fw = Front_Wheels()
-from autorc.picar3.hardware.back_wheels import Back_Wheels
-bw = Back_Wheels()
 
-
-class Views:
+class StaticViews(object):
 
     ''' Serve static views '''
     @aiohttp_jinja2.template('index.html')
@@ -41,7 +33,7 @@ class Views:
         return {'key': session[config.SESSION_KEY]}
 
 
-class SocketController:
+class SocketController(object):
     ''' Controll car via web socket controller '''
 
     USERS = 'ws_ctlr_user'
@@ -179,20 +171,15 @@ class SocketController:
                 steering = range_map(
                     steering_percent, -1, 1, 70, 110, int_only=True)
                 logger.info('Steer %d', steering)
-                fw.turn(steering)
             elif action == CONSTANTS.VEHICLE_THROTTLE:
                 throttle_percent = data.get('value', 0)
                 throttle = range_map(
                     abs(throttle_percent), 0, 1, 50, 100, int_only=True)
-                bw.speed = throttle
                 if throttle_percent > 0:
-                    bw.forward()
                     logger.info('Forward %d', throttle)
                 elif throttle_percent < 0:
-                    bw.backward()
                     logger.info('Backward %d', throttle)
                 else:
-                    bw.stop()
                     logger.info('Stop')
 
     async def handler(self, request):
@@ -226,31 +213,44 @@ class SocketController:
         return ws
 
 
-class WebController():
+class WebController(AsyncNode):
+    def __init__(self, context, *, host='0.0.0.0', port=8080,
+                 mjpeg_frame_rate=24, **kwargs):
+        super(WebController, self).__init__(context, **kwargs)
+        self.host = host
+        self.port = port
+        self.mjpeg_frame_rate = mjpeg_frame_rate
+
     def config_router(self, router, app):
-        views = Views()
+        views = StaticViews()
         sc = SocketController(app)
+        mjpeg = MjpegStreamer(self.context, frame_rate=self.mjpeg_frame_rate)
+        self.sc = sc
+        self.mjpeg = mjpeg
         router.add_static('/static/', os.path.join(BASE_DIR, 'static'))
         router.add_get('/', views.index)
         router.add_get('/ws', sc.handler)
+        router.add_get('/mjpeg_stream', mjpeg.handler)
 
-    def create_server(self, ioloop=None):
-        ioloop = ioloop or asyncio.get_event_loop()
-        app = web.Application(loop=ioloop, logger=logger)
+    async def start_up(self):
+        app = web.Application(logger=self.logger)
+        self.app = app
 
         aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(
             os.path.join(BASE_DIR, 'templates')))
 
         self.config_router(app.router, app)
+
         secret = config.WEB_CONTROLLER_SECRET_KEY
         if isinstance(secret, str):
             secret = secret.encode('utf-8')
         setup_session(
             app, EncryptedCookieStorage(secret))
 
-        self.app = app
-        self.ioloop = ioloop
-        return app
+        self.runner = web.AppRunner(app)
+        await self.runner.setup()
+        site = web.TCPSite(self.runner, host=self.host, port=self.port)
+        await site.start()
 
     def collect_static(self):
         ''' Build static files for ui application (React) '''
@@ -267,13 +267,28 @@ class WebController():
         logger.info('Building UI')
         subprocess.run(["npm", "run", "build", "--prefix", UI_BASE])
 
-    def runserver(self):
-        if config.WEB_CONTROLLER_COLLECT_STATIC:
-            self.collect_static()
-        web.run_app(self.create_server(), host=config.WEB_CONTROLLER_HOST,
-                    port=config.WEB_CONTROLLER_PORT)
-
 
 if __name__ == '__main__':
-    wc = WebController()
-    wc.runserver()
+    from multiprocessing import Process, Manager, Event
+    from autorc.nodes.camera import CVWebCam, PGWebCam
+    import time
+    with Manager() as manager:
+        context = manager.dict()
+        stop_event = Event()
+        wc = WebController(context)
+        cam = CVWebCam(context)
+
+        p_wc = Process(target=wc.start, args=(stop_event, ))
+        p_wc.daemon = True
+        p_wc.start()
+
+        p_cam = Process(target=cam.start, args=(stop_event, ))
+        p_cam.daemon = True
+        p_cam.start()
+
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            print('Force shutdown server')
+            stop_event.set()

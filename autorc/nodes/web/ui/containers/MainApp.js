@@ -35,19 +35,19 @@ class MainApp extends Component {
     render() {
         const { notifications, chat, actions } = this.props;
         const { steering, throttle } = this.state;
-        return <div className="main-app container-fluid">
+        return <div className="main-app">
             <Notification
                 notifications={notifications}
                 onDismiss={actions.notifications.clearNotification}
             />
-            <div className="row">
-                <div className="col-sm-4">
-                    Camera
-                </div>
-                <div className="col-sm-8">
-                    Stats. Speed: {throttle}. Steer: {steering}.<br/>
-                    <img src="/static/images/steeringwheel.png" style={{transform: `rotate(${steering}deg)`}} alt="☺"/>
-                </div>
+            <div className="camera-view">
+                <img src="/mjpeg_stream" alt="Fetching camera view"/>
+            </div>
+            <div className="steering-visualize">
+                <img src="/static/images/steeringwheel.png" style={{transform: `rotate(${steering}deg)`}} alt="☺"/>
+            </div>
+            <div className="stats">
+                Stats. Speed: {throttle}. Steer: {steering}.<br/>
             </div>
             <JoystickController onThrottleChange={this.throttle} onSteeringChange={this.steer}/>
         </div>

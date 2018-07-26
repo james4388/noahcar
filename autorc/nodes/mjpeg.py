@@ -7,7 +7,7 @@ from autorc.nodes import AsyncNode
 
 class MjpegStreamer(AsyncNode):
     ''' Stand alone mjpeg streamer (for testing only) '''
-    def __init__(self, context, input_key='cam/image-jpeg', host='0.0.0.0',
+    def __init__(self, context, *, input_key='cam/image-jpeg', host='0.0.0.0',
                  port=8888, frame_rate=24, **kwargs):
         super(MjpegStreamer, self).__init__(context, **kwargs)
         self.input_key = input_key
