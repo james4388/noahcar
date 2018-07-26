@@ -12,7 +12,7 @@ class TestCameraNode(Node):
         self.counter = 0
         self.counter2 = 0
         self.Image = Image
-        super(TestCameraNode, self).__init__(context, {
+        super(TestCameraNode, self).__init__(context, input_callback={
             'on_jpeg_arrive': CVWebCam.OUT_PUT_JPEG,
             'on_np_arrive': CVWebCam.OUT_PUT_NUMPY
         }, **kwargs)
@@ -26,6 +26,7 @@ class TestCameraNode(Node):
             self.output('test_frame_%d' % self.counter, 'VALID')
         except Exception:
             self.output('test_frame_%d' % self.counter, 'INVALID')
+        self.output('tested_frame', self.counter)
 
     def on_np_arrive(self, nparr):
         self.counter2 += 1
@@ -55,7 +56,9 @@ class CVNodeTestCase(unittest.TestCase):
             stop_event.set()
 
     def test_capture_image(self):
-        for i in range(4):
+        tested_frame = self.context.get('tested_frame', -1)
+        self.assertEqual(tested_frame > 0, True)
+        for i in range(tested_frame):
             self.assertEqual(
                 self.context.get('test_frame_%d' % (i + 1)), 'VALID')
             self.assertEqual(

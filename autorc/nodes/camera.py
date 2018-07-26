@@ -41,8 +41,6 @@ class BaseWebCam(Node):
                 self.OUT_PUT_JPEG: jpeg,
                 self.OUT_PUT_NUMPY: np_array
             })
-        else:
-            self.logger.debug('Got empty frame')
 
 
 class CVWebCam(BaseWebCam):
