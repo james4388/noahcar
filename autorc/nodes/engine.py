@@ -11,14 +11,16 @@ class Engine(Node):
     def __init__(self, context, **kwargs):
         super(Engine, self).__init__(context, **kwargs)
         # Test car
+        self.steering = None
+        self.throttle = None
+
+    def start_up(self):
         pwm = PCA9685.PWM(bus_number=1)
         pwm.setup()
         pwm.frequency = 60
         self.pwm = pwm
         self.fw = Front_Wheels()
         self.bw = Back_Wheels()
-        self.steering = None
-        self.throttle = None
 
     def process_loop(self, *args):
         if self.input_updated(('user/steering', )):
