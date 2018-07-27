@@ -39,8 +39,12 @@ class SocketController(object):
     USERS = 'ws_ctlr_user'
     _counter = 0    # Connection counter
 
-    def __init__(self, app: web.Application):
+    def __init__(self, app: web.Application, update_context: None):
         self.app = app
+        if callable(update_context):
+            self.update_context = update_context
+        else:
+            self.update_context = lambda x: x
         if self.USERS not in app:
             app[self.USERS] = {}
             logger.debug('Socket started! Waiting for connection')
@@ -168,19 +172,10 @@ class SocketController(object):
                 })
             elif action == CONSTANTS.VEHICLE_STEER:
                 steering_percent = data.get('value', 0)
-                steering = range_map(
-                    steering_percent, -1, 1, 70, 110, int_only=True)
-                logger.info('Steer %d', steering)
+                self.update_context('user/steering', steering_percent)
             elif action == CONSTANTS.VEHICLE_THROTTLE:
                 throttle_percent = data.get('value', 0)
-                throttle = range_map(
-                    abs(throttle_percent), 0, 1, 50, 100, int_only=True)
-                if throttle_percent > 0:
-                    logger.info('Forward %d', throttle)
-                elif throttle_percent < 0:
-                    logger.info('Backward %d', throttle)
-                else:
-                    logger.info('Stop')
+                self.update_context('user/throttle', throttle_percent)
 
     async def handler(self, request):
         ws = web.WebSocketResponse(heartbeat=1.0, timeout=1.0, autoping=True,
@@ -216,14 +211,17 @@ class SocketController(object):
 class WebController(AsyncNode):
     def __init__(self, context, *, host='0.0.0.0', port=8080,
                  mjpeg_frame_rate=24, **kwargs):
-        super(WebController, self).__init__(context, **kwargs)
+        super(WebController, self).__init__(context, inputs={
+            'update_stats': ('pilot/steering', 'pilot/throttle')
+        }, **kwargs)
         self.host = host
         self.port = port
         self.mjpeg_frame_rate = mjpeg_frame_rate
 
     def config_router(self, router, app):
         views = StaticViews()
-        sc = SocketController(app)
+        sc = SocketController(app, update_context=self.update)
+        self.socket = sc
         mjpeg = MjpegStreamer(self.context, frame_rate=self.mjpeg_frame_rate)
         self.sc = sc
         self.mjpeg = mjpeg
@@ -231,6 +229,20 @@ class WebController(AsyncNode):
         router.add_get('/', views.index)
         router.add_get('/ws', sc.handler)
         router.add_get('/mjpeg_stream', mjpeg.handler)
+
+    async def update_stats(self, *args):
+        try:
+            await self.socket.broadcast({
+                'action': CONSTANTS.VEHICLE_STATS_RESPONSE,
+                'vehicle_stats': {
+                    'throttle': 0,
+                    'steering': 0,
+                    'pilot/throttle': self.context.get('pilot/throttle'),
+                    'pilot/steering': self.context.get('pilot/steering'),
+                }
+            })
+        except Exception:
+            pass
 
     async def start_up(self):
         app = web.Application(logger=self.logger)
@@ -271,12 +283,14 @@ class WebController(AsyncNode):
 if __name__ == '__main__':
     from multiprocessing import Process, Manager, Event
     from autorc.nodes.camera import CVWebCam, PGWebCam
+    from autorc.nodes.engine import Engine
     import time
     with Manager() as manager:
         context = manager.dict()
         stop_event = Event()
         wc = WebController(context)
         cam = CVWebCam(context)
+        engine = Engine(context)
 
         p_wc = Process(target=wc.start, args=(stop_event, ))
         p_wc.daemon = True
@@ -285,6 +299,10 @@ if __name__ == '__main__':
         p_cam = Process(target=cam.start, args=(stop_event, ))
         p_cam.daemon = True
         p_cam.start()
+
+        p_eng = Process(target=engine.start, args=(stop_event, ))
+        p_eng.daemon = True
+        p_eng.start()
 
         try:
             while True:

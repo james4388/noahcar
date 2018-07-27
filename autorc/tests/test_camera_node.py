@@ -12,9 +12,11 @@ class TestCameraNode(Node):
         self.counter = 0
         self.counter2 = 0
         self.Image = Image
-        super(TestCameraNode, self).__init__(context, input_callback={
-            'on_jpeg_arrive': CVWebCam.OUT_PUT_JPEG,
-            'on_np_arrive': CVWebCam.OUT_PUT_NUMPY
+        super(TestCameraNode, self).__init__(context, inputs={
+            'on_jpeg_arrive': 'cam/jpeg',
+            'on_np_arrive': 'cam/np'
+        }, outputs={
+            'on_jpeg_arrive': 'tested_frame'
         }, **kwargs)
 
     def on_jpeg_arrive(self, image):
@@ -23,15 +25,15 @@ class TestCameraNode(Node):
         f = BytesIO(image)
         try:
             self.Image.open(f)
-            self.output('test_frame_%d' % self.counter, 'VALID')
+            self.update('test_frame_%d' % self.counter, 'VALID')
         except Exception:
-            self.output('test_frame_%d' % self.counter, 'INVALID')
-        self.output('tested_frame', self.counter)
+            self.update('test_frame_%d' % self.counter, 'INVALID')
+        return self.counter
 
     def on_np_arrive(self, nparr):
         self.counter2 += 1
         self.logger.info('Frame %d has shape %s', self.counter2, nparr.shape)
-        self.output('test_np_%d' % self.counter2, nparr.shape)
+        self.update('test_np_%d' % self.counter2, nparr.shape)
 
 
 class CVNodeTestCase(unittest.TestCase):
@@ -42,7 +44,9 @@ class CVNodeTestCase(unittest.TestCase):
             context = manager.dict()
             stop_event = Event()
             test_node = TestCameraNode(context)
-            cam_node = self.camera_class(context, max_loop=10)
+            cam_node = self.camera_class(context, max_loop=10,
+                                         numpy_size=(64, 64),
+                                         outputs=('cam/jpeg', 'cam/np'))
             p_cam = Process(target=cam_node.start, args=(stop_event, ))
             p_test = Process(target=test_node.start, args=(stop_event, ))
             p_test.daemon = True

@@ -7,31 +7,32 @@ from autorc.nodes import Node
 
 class TestNode(Node):
     def __init__(self, context):
-        super(TestNode, self).__init__(context, input_callback={
+        super(TestNode, self).__init__(context, inputs={
             'on_key1_change': 'key1',
             'on_key23_change': ('key2', 'key3'),
             'on_np_arr': 'keynp'
+        }, outputs={
+            'on_key1_change': 'test_result_key1',
+            'on_key23_change': (
+                'test_result_key2', 'test_result_key3', 'test_result_key23'),
+            'on_np_arr': 'np_arr_result'
         })
 
     def on_key1_change(self, key1):
         self.logger.info('Got new key1 %s', key1)
         time.sleep(0.5)
-        self.output('test_result_key1', key1 + 1)
+        return key1 + 1
 
     def on_key23_change(self, key2, key3):
         key2 = key2 + 3
         key3 = key3 - 4
         self.logger.info('Got new key2, key3, %s, %s', key2, key3)
-        self.output('test_result_key23', key2 * key3)
-        self.outputs({
-            'test_result_key2': key2,
-            'test_result_key3': key3
-        })
+        return key2, key3, key2 * key3
 
     def on_np_arr(self, nparr):
         self.logger.info('Got new nparray %s', nparr)
         result = nparr + 2
-        self.output('np_arr_result', result)
+        return result
 
 
 class NodeTestCase(unittest.TestCase):

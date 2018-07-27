@@ -9,19 +9,20 @@ class BaseWebCam(Node):
             jpeg for client streaming
             numpy image array for deep learning
     '''
-    OUT_PUT_JPEG = 'cam/image-jpeg'
-    OUT_PUT_NUMPY = 'cam/image-np'
 
-    def __init__(self, context, size=(160, 120), framerate=20,
-                 numpy_size=(64, 64), **kwargs):
+    def __init__(self, context,
+                 outputs=('cam/image-jpeg', 'cam/image-np'),
+                 size=(160, 120), framerate=20,
+                 numpy_size=(160, 120), **kwargs):
         '''
             size for raw record and jpeg stream size
             numpy_size size of array for deep learning
         '''
         self.size = size
         self.numpy_size = numpy_size
-        super(BaseWebCam, self).__init__(context, process_rate=framerate,
-                                         **kwargs)
+        super(BaseWebCam, self).__init__(
+            context, outputs=outputs,
+            process_rate=framerate, **kwargs)
 
     def get_frame(self):
         raise Exception('Not yet implemented')
@@ -37,10 +38,7 @@ class BaseWebCam(Node):
         if frame is not None:
             jpeg = self.get_jpeg(frame)
             np_array = self.get_np_array(frame)
-            self.outputs({
-                self.OUT_PUT_JPEG: jpeg,
-                self.OUT_PUT_NUMPY: np_array
-            })
+            return jpeg, np_array
 
 
 class CVWebCam(BaseWebCam):
@@ -49,7 +47,7 @@ class CVWebCam(BaseWebCam):
     cam = None      # open CV cam instance
 
     def __init__(self, context, size=(160, 120), framerate=20,
-                 numpy_size=(64, 64), capture_device=0, jpeg_quality=90,
+                 numpy_size=(160, 120), capture_device=0, jpeg_quality=90,
                  use_rgb=True, **kwargs):
         super(CVWebCam, self).__init__(context, size=size, framerate=framerate,
                                        numpy_size=numpy_size, **kwargs)
@@ -98,7 +96,7 @@ class PGWebCam(BaseWebCam):
         USB webcam interface using Pygame
     '''
     def __init__(self, context, size=(160, 120), framerate=20,
-                 numpy_size=(64, 64), capture_device=None, jpeg_quality=90,
+                 numpy_size=(160, 120), capture_device=None, jpeg_quality=90,
                  use_bgr=False, **kwargs):
         super(PGWebCam, self).__init__(context, size=size, framerate=framerate,
                                        numpy_size=numpy_size, **kwargs)

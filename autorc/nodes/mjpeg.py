@@ -7,10 +7,11 @@ from autorc.nodes import AsyncNode
 
 class MjpegStreamer(AsyncNode):
     ''' Stand alone mjpeg streamer (for testing only) '''
-    def __init__(self, context, *, input_key='cam/image-jpeg', host='0.0.0.0',
+    def __init__(self, context, *, inputs=('cam/image-jpeg', ), host='0.0.0.0',
                  port=8888, frame_rate=24, **kwargs):
-        super(MjpegStreamer, self).__init__(context, **kwargs)
-        self.input_key = input_key
+        super(MjpegStreamer, self).__init__(context, inputs=inputs, **kwargs)
+        if not inputs or len(inputs) < 1:
+            raise Exception('Input key (jpeg stream) is required')
         self.host = host
         self.port = port
         self.is_run = True
@@ -51,7 +52,7 @@ class MjpegStreamer(AsyncNode):
             max_sleep_time = 1.0 / self.frame_rate
             while self.is_run:
                 start_time = time.time()
-                frame = self.context.get(self.input_key)
+                frame = self.context.get(self.inputs[0])
                 if frame is not None:
                     try:
                         # Write header

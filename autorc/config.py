@@ -4,6 +4,7 @@ import logging
 import os
 
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 logger = logging.getLogger(__name__)
 
 # ======= DEFAULT CONFIG GOES HERE ============
@@ -41,6 +42,9 @@ WEB_CONTROLLER_COLLECT_STATIC = False   # Do not collect static before run
 # SECRET_KEY Must be 32 chars
 WEB_CONTROLLER_SECRET_KEY = 'Very secret KEY, keep safe !@#%*'
 SESSION_KEY = 'session_key'
+
+# Training set location
+TRAINING_SET_ROOT = os.path.join(BASE_DIR, 'training-set')
 # ========== END DEFAULT CONFIG ===============
 
 

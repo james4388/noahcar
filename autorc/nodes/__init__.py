@@ -1,6 +1,7 @@
 import time
 import logging
 import asyncio
+import typing
 
 __version__ = '0.1'
 
@@ -14,62 +15,78 @@ class Node(object):
     ''' Base class for vehicle nodes
         A node will be run in it own process or managed by main vehicle loop
         Check for new input data by comparing timestamps header
-        input_callback = [
+        inputs = {
             'on_image_update': 'image',
             'on_driving': ('steering', 'steering')
-        ]
+        }
+        or
+        input = ['image', 'steering'] without method will be pass to
+        process loop
+        same for process
         When image is update (based on timestamp) on_image_update will be call
         image become arg for on_image_update
         on_driving only called when both steering and throttle is updated
     '''
-    input_callback = None         # Input call back
+    inputs = None                 # Input call back
     input_timestamps = None       # Cache last input timestamp for updated
-    output_cache = None                 # Output cache
+    outputs = None                # Output
     inititalized = False
     max_loop = None               # Use for testing, exit process after loops
     process_rate = 24             # process loop should be call per second
+    input_output_mapping = None
 
-    def __init__(self, context, *, input_callback: dict=None, process_rate=24,
-                 max_loop=None, **kwargs):
+    def __init__(self, context, *,
+                 inputs: typing.Union[dict, list, tuple]=None,
+                 outputs: typing.Union[dict, list, tuple]=None,
+                 process_rate=24, max_loop=None, **kwargs):
         super(Node, self).__init__()
         self.logger = logging.getLogger(self.__class__.__name__)
         self.max_loop = max_loop
         self.context = context
         self.input_timestamps = {}
-        if (input_callback):
-            self.input_callback = input_callback
+        if (inputs):
+            self.inputs = inputs
+        if (outputs):
+            self.outputs = outputs
         # Convert callback name to class method
-        if self.input_callback:
-            for cb, inputs in list(self.input_callback.items()):
-                if not isinstance(inputs, (list, tuple)):
-                    inputs = (inputs, )
+        self.input_output_mapping = {}
+        self._prepare_mapping(self.inputs, 'inputs')
+        self._prepare_mapping(self.outputs, 'outputs')
+        self.inititalized = True
+
+    def _prepare_mapping(self, keys, mtype='inputs'):
+        if keys:
+            if isinstance(keys, (list, tuple)):
+                keys = {'process_loop': keys}
+            for cb, args in keys.items():
+                if not isinstance(args, (list, tuple)):
+                    args = (args, )
                 if isinstance(cb, str):
                     cb_method = getattr(self, cb, None)
                     if not callable(cb_method):
-                        raise Exception('Callback %s does not existed in %s' %
+                        raise Exception('Method %s does not existed in %s' %
                                         (cb, self.__class__.__name__))
-                    self.input_callback[cb_method] = inputs
-                    del self.input_callback[cb]
-        self.inititalized = True
+                    if cb_method not in self.input_output_mapping:
+                        self.input_output_mapping[cb_method] = {}
+                    self.input_output_mapping[cb_method][mtype] = args
+
+    def __repr__(self):
+        return self.__class__.__name__
 
     def make_timestamp_key(self, key):
         return key + '__timestamp'
 
-    def output(self, key, value):
+    def update(self, key, value):
         ''' Write output to current context, add timestamp to track updates '''
-        key_timestamp = self.make_timestamp_key(key)
-        self.context.update({
-            key: value,
-            key_timestamp: time.time()
-        })
+        self.updates({key: value})
 
-    def outputs(self, data: dict):
+    def updates(self, data: dict):
         ''' Update multiple key, values '''
         updater = {}
         timestamp = time.time()
         for k, v in data.items():
             updater[k] = v
-            updater[k + '__timestamp'] = timestamp
+            updater[self.make_timestamp_key(k)] = timestamp
         self.context.update(updater)
 
     def input_updated(self, inputs):
@@ -103,16 +120,34 @@ class Node(object):
         self.start_up()
         loop_count = 0
         max_sleep_time = 1.0 / self.process_rate
+        mapper = tuple(
+            (callback, innout.get('inputs'), innout.get('outputs'))
+            for callback, innout in self.input_output_mapping.items()
+        )
         while not stop_event.is_set():  # Listen for stop event
             start_time = time.time()
             # Check and call callback on input updated
-            if self.input_callback:
-                for callback, inputs in self.input_callback.items():
-                    if self.input_updated(inputs):
-                        cbargs = [self.context.get(input) for input in inputs]
-                        callback(*cbargs)
+            if mapper:
+                for callback, inputs, outputs in mapper:
+                    ret = None
+                    if inputs is not None:
+                        if self.input_updated(inputs):
+                            cbargs = [self.context.get(input)
+                                      for input in inputs]
+                            ret = callback(*cbargs)
+                    else:
+                        ret = callback()
+                    if ret is not None:
+                        if not isinstance(ret, tuple):
+                            ret = (ret, )
+                        if outputs is not None and len(ret) == len(outputs):
+                            self.updates({
+                                key: ret[i] for i, key in enumerate(outputs)
+                            })
+                        else:
+                            self.logger.error(
+                                'Outputs and keys mismatch in %s', callback)
 
-            self.process_loop(*args)
             loop_count += 1
 
             if self.max_loop and self.max_loop <= loop_count:
@@ -148,20 +183,37 @@ class AsyncNode(Node):
     async def start_up(self):
         pass
 
-    async def main_loop(self, stop_event, *args):
+    async def async_loop(self, stop_event, *args):
         await self.start_up()
         loop_count = 0
         max_sleep_time = 1.0 / self.process_rate
+        mapper = tuple(
+            (callback, innout.get('inputs'), innout.get('outputs'))
+            for callback, innout in self.input_output_mapping.items()
+        )
         while not stop_event.is_set():  # Listen for stop event
             start_time = time.time()
             # Check and call callback on input updated
-            if self.input_callback:
-                for callback, inputs in self.input_callback.items():
-                    if self.input_updated(inputs):
-                        cbargs = [self.context.get(input) for input in inputs]
-                        await callback(*cbargs)
-
-            await self.process_loop(*args)
+            if mapper:
+                for callback, inputs, outputs in mapper:
+                    ret = None
+                    if inputs:
+                        if self.input_updated(inputs):
+                            cbargs = [self.context.get(input)
+                                      for input in inputs]
+                            ret = await callback(*cbargs)
+                    else:
+                        ret = await callback()
+                    if ret is not None:
+                        if not isinstance(ret, tuple):
+                            ret = (ret, )
+                        if outputs and len(ret) == len(outputs):
+                            self.updates({
+                                key: ret[i] for i, key in enumerate(outputs)
+                            })
+                        else:
+                            self.logger.error(
+                                'Outputs and keys mismatch in %s', callback)
             loop_count += 1
 
             if self.max_loop and self.max_loop <= loop_count:
@@ -190,5 +242,5 @@ class AsyncNode(Node):
         if self.loop is None:
             self.loop = asyncio.get_event_loop()
         self.logger.info('Process %s started!' % self.__class__.__name__)
-        self.loop.run_until_complete(self.main_loop(stop_event, *args))
+        self.loop.run_until_complete(self.async_loop(stop_event, *args))
         self.loop.close()
