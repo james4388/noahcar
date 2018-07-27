@@ -9,6 +9,7 @@ from autorc.picar3.hardware.back_wheels import Back_Wheels
 
 class Engine(Node):
     def __init__(self, context, **kwargs):
+        # Error in process_loop, no output, no run
         super(Engine, self).__init__(context, **kwargs)
         # Test car
         self.steering = None
