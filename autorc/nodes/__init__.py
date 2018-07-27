@@ -52,9 +52,10 @@ class Node(object):
         self.input_output_mapping = {}
         self._prepare_mapping(self.inputs, 'inputs')
         self._prepare_mapping(self.outputs, 'outputs')
-        if 'process_loop' not in self.input_output_mapping:
+        process_loop = getattr(self, 'process_loop', None)
+        if process_loop not in self.input_output_mapping:
             # Process loop just need to run
-            self.input_output_mapping[getattr(self, 'process_loop', None)] = {}
+            self.input_output_mapping[process_loop] = {}
         self.inititalized = True
 
     def _prepare_mapping(self, keys, mtype='inputs'):
