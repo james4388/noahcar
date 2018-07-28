@@ -14,12 +14,12 @@ class CVNodeTestCase(unittest.TestCase):
             context = manager.dict()
             stop_event = Event()
             self.stop_event = stop_event
-            cam_node = self.camera_class(context)
-            p_cam = Process(target=cam_node.start, args=(stop_event, ))
+            p_cam = Process(target=self.camera_class.start,
+                            args=(context, stop_event, ))
             p_cam.daemon = True
             p_cam.start()
-            mjpeg_node = MjpegStreamer(context)
-            p_mjpeg = Process(target=mjpeg_node.start, args=(stop_event, ))
+            p_mjpeg = Process(target=MjpegStreamer.start,
+                              args=(context, stop_event, ))
             p_mjpeg.daemon = True
             p_mjpeg.start()
             self.manager = manager

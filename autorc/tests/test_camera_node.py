@@ -5,6 +5,13 @@ from io import BytesIO
 from autorc.nodes import Node
 from autorc.nodes.camera import CVWebCam, PGWebCam
 
+try:
+    import pygame
+    from pygame import _camera
+    pycam_test = True
+except ImportError:
+    pycam_test = False
+
 
 class TestCameraNode(Node):
     def __init__(self, context, **kwargs):
@@ -43,12 +50,14 @@ class CVNodeTestCase(unittest.TestCase):
         with Manager() as manager:
             context = manager.dict()
             stop_event = Event()
-            test_node = TestCameraNode(context)
-            cam_node = self.camera_class(context, max_loop=10,
-                                         numpy_size=(64, 64),
-                                         outputs=('cam/jpeg', 'cam/np'))
-            p_cam = Process(target=cam_node.start, args=(stop_event, ))
-            p_test = Process(target=test_node.start, args=(stop_event, ))
+            p_cam = Process(
+                target=self.camera_class.start,
+                args=(context, stop_event),
+                kwargs={'max_loop': 10, 'numpy_size': (64, 64),
+                        'outputs': ('cam/jpeg', 'cam/np')}
+            )
+            p_test = Process(
+                target=TestCameraNode.start, args=(context, stop_event, ))
             p_test.daemon = True
             p_test.start()
             p_cam.daemon = True
@@ -72,3 +81,7 @@ class CVNodeTestCase(unittest.TestCase):
 
 class PGNodeTestCase(CVNodeTestCase):
     camera_class = PGWebCam
+
+    @unittest.skipIf(not pycam_test, 'Pygame is not present')
+    def run(self, result=None):
+        super(PGNodeTestCase, self).run(result)

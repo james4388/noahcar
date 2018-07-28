@@ -288,19 +288,18 @@ if __name__ == '__main__':
     with Manager() as manager:
         context = manager.dict()
         stop_event = Event()
-        wc = WebController(context)
-        cam = CVWebCam(context)
-        engine = Engine(context)
 
-        p_wc = Process(target=wc.start, args=(stop_event, ))
+        p_wc = Process(target=WebController.start,
+                       args=(context, stop_event, ))
         p_wc.daemon = True
         p_wc.start()
 
-        p_cam = Process(target=cam.start, args=(stop_event, ))
+        p_cam = Process(target=CVWebCam.start,
+                        args=(context, stop_event, ))
         p_cam.daemon = True
         p_cam.start()
 
-        p_eng = Process(target=engine.start, args=(stop_event, ))
+        p_eng = Process(target=Engine.start, args=(context, stop_event, ))
         p_eng.daemon = True
         p_eng.start()
 

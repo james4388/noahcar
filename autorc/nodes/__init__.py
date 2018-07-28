@@ -30,7 +30,6 @@ class Node(object):
     inputs = None                 # Input call back
     input_timestamps = None       # Cache last input timestamp for updated
     outputs = None                # Output
-    inititalized = False
     max_loop = None               # Use for testing, exit process after loops
     process_rate = 24             # process loop should be call per second
     input_output_mapping = None
@@ -38,9 +37,9 @@ class Node(object):
     def __init__(self, context, *,
                  inputs: typing.Union[dict, list, tuple]=None,
                  outputs: typing.Union[dict, list, tuple]=None,
-                 process_rate=24, max_loop=None, **kwargs):
+                 process_rate=24, max_loop=None, logger=None, **kwargs):
         super(Node, self).__init__()
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger = logger or logging.getLogger(self.__class__.__name__)
         self.max_loop = max_loop
         self.context = context
         self.input_timestamps = {}
@@ -53,10 +52,9 @@ class Node(object):
         self._prepare_mapping(self.inputs, 'inputs')
         self._prepare_mapping(self.outputs, 'outputs')
         process_loop = getattr(self, 'process_loop', None)
-        if process_loop not in self.input_output_mapping:
+        if process_loop and process_loop not in self.input_output_mapping:
             # Process loop just need to run
             self.input_output_mapping[process_loop] = {}
-        self.inititalized = True
 
     def _prepare_mapping(self, keys, mtype='inputs'):
         if keys:
@@ -114,12 +112,9 @@ class Node(object):
     def start_up(self):
         pass
 
-    # Overwrite as you own risk
-    def start(self, stop_event, *args):
-        if not self.inititalized:
-            raise Exception(
-                'Node base class has not been propper init. '
-                'Call super() from %s.__init__' % self.__class__.__name__)
+    @classmethod
+    def start(cls, context, stop_event, *args, **kwargs):
+        self = cls(context, *args, **kwargs)
         self.logger.info('Process %s started!' % self.__class__.__name__)
         self.start_up()
         loop_count = 0
@@ -238,11 +233,9 @@ class AsyncNode(Node):
         self.input_callback = None
         self.input_timestamps = None
 
-    def start(self, stop_event, *args):
-        if not self.inititalized:
-            raise Exception(
-                'Node base class has not been propper init. '
-                'Call super() from %s.__init__' % self.__class__.__name__)
+    @classmethod
+    def start(cls, context, stop_event, *args, **kwargs):
+        self = cls(context, *args, **kwargs)
         if self.loop is None:
             self.loop = asyncio.get_event_loop()
         self.logger.info('Process %s started!' % self.__class__.__name__)

@@ -33,8 +33,7 @@ class NodeTestCase(unittest.TestCase):
         with Manager() as manager:
             context = manager.dict()
             stop_event = Event()
-            node = TestAsyncNode(context)
-            p = Process(target=node.start, args=(stop_event, ))
+            p = Process(target=TestAsyncNode.start, args=(context, stop_event))
             p.daemon = True
             p.start()
             self.manager = manager

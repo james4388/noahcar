@@ -1,6 +1,7 @@
 import unittest
 import time
 import numpy as np
+import multiprocessing
 from multiprocessing import Process, Manager, Event
 from autorc.nodes import Node
 
@@ -17,11 +18,26 @@ class TestNode(Node):
                 'test_result_key2', 'test_result_key3', 'test_result_key23'),
             'on_np_arr': 'np_arr_result'
         })
+        print('TestNode init from', multiprocessing.current_process().name)
+        for cb in self.input_output_mapping:
+            print('Method', cb, id(cb))
+
+    def __getstate__(self):
+        print(multiprocessing.current_process().name, 'get my state')
+        return True
+
+    def __setstate__(self, *args, **kwargs):
+        print(multiprocessing.current_process().name, 'set my state')
+        return True
 
     def on_key1_change(self, key1):
-        self.logger.info('Got new key1 %s', key1)
+        self.logger.info('Got new key1 %s, from %s', key1,
+                         multiprocessing.current_process().name)
         time.sleep(0.5)
         return key1 + 1
+
+    def start_up(self):
+        print('Start up from', multiprocessing.current_process().name)
 
     def on_key23_change(self, key2, key3):
         key2 = key2 + 3
@@ -31,6 +47,7 @@ class TestNode(Node):
 
     def on_np_arr(self, nparr):
         self.logger.info('Got new nparray %s', nparr)
+        print('Np array id proc', id(nparr))
         result = nparr + 2
         return result
 
@@ -40,8 +57,7 @@ class NodeTestCase(unittest.TestCase):
         with Manager() as manager:
             context = manager.dict()
             stop_event = Event()
-            node = TestNode(context)
-            p = Process(target=node.start, args=(stop_event, ))
+            p = Process(target=TestNode.start, args=(context, stop_event, ))
             p.daemon = True
             p.start()
             self.manager = manager
@@ -70,9 +86,11 @@ class NodeTestCase(unittest.TestCase):
         self.assertEqual(self.context.get('test_result_key23'), 6)
 
     def test_nparray(self):
-        self.context['keynp'] = np.array([1, 2, 3, 4, 5])
+        arr = np.array([1, 2, 3, 4, 5])
+        print('Np array id main', id(arr))
+        self.context['keynp'] = arr
         time.sleep(1)
         self.assertEqual(np.array_equal(
             self.context.get('np_arr_result'),
-            np.array([3, 4, 5, 6, 7])
+            arr + 2
         ), True)
