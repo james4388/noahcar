@@ -21,8 +21,11 @@ class Vehicle(object):
         self.nodes.append((node_cls, args, kwargs))
 
     def main_loop(self):
-        while True:
-            time.sleep(1)
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            return
 
     def start(self):
         ''' Start the vehicle '''
@@ -44,19 +47,20 @@ class Vehicle(object):
 
             # Begin main vehicle loop?
             print('Engine started! (Press CTRL+C to quit)')
+            self.main_loop()
+            self.stop_event.set()
+            self.shutdown()
+
+    def shutdown(self):
+        print('Shutting down.')
+        # Waiting for all process to stop on it self
+        time.sleep(2)
+        for p in self.processes:
             try:
-                self.main_loop()
-            except KeyboardInterrupt:
-                self.stop_event.set()
-            print('Shutting down.')
-            # Waiting for all process to stop on it self
-            time.sleep(2)
-            for p in self.processes:
-                try:
-                    p.terminate()
-                except Exception as ex:
-                    self.logger.error(ex)
-                    pass
+                p.terminate()
+            except Exception as ex:
+                self.logger.error(ex)
+                pass
 
 
 if __name__ == '__main__':

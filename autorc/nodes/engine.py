@@ -8,9 +8,10 @@ from autorc.picar3.hardware.back_wheels import Back_Wheels
 
 
 class Engine(Node):
-    def __init__(self, context, **kwargs):
+    def __init__(self, context, process_rate=50, **kwargs):
         # Error in process_loop, no output, no run
-        super(Engine, self).__init__(context, **kwargs)
+        super(Engine, self).__init__(context, process_rate=process_rate,
+                                     **kwargs)
         # Test car
         self.steering = None
         self.throttle = None
@@ -22,6 +23,9 @@ class Engine(Node):
         self.pwm = pwm
         self.fw = Front_Wheels()
         self.bw = Back_Wheels()
+
+    def shutdown(self):
+        self.pwm.frequency = 0  # Is it work?
 
     def process_loop(self, *args):
         if self.input_updated(('user/steering', )):

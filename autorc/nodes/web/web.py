@@ -176,6 +176,12 @@ class SocketController(object):
             elif action == CONSTANTS.VEHICLE_THROTTLE:
                 throttle_percent = data.get('value', 0)
                 self.update_context('user/throttle', throttle_percent)
+            elif action == CONSTANTS.TRAINING_RECORD_START:
+                print('You are on cam. smile')
+                self.update_context('training/record', True)
+            elif action == CONSTANTS.TRAINING_RECORD_END:
+                print('Done')
+                self.update_context('training/record', False)
 
     async def handler(self, request):
         ws = web.WebSocketResponse(heartbeat=1.0, timeout=1.0, autoping=True,
@@ -283,7 +289,7 @@ class WebController(AsyncNode):
 if __name__ == '__main__':
     from multiprocessing import Process, Manager, Event
     from autorc.nodes.camera import CVWebCam, PGWebCam
-    from autorc.nodes.engine import Engine
+    # from autorc.nodes.engine import Engine
     import time
     with Manager() as manager:
         context = manager.dict()
@@ -299,9 +305,10 @@ if __name__ == '__main__':
         p_cam.daemon = True
         p_cam.start()
 
+        '''
         p_eng = Process(target=Engine.start, args=(context, stop_event, ))
         p_eng.daemon = True
-        p_eng.start()
+        p_eng.start()'''
 
         try:
             while True:
@@ -309,3 +316,4 @@ if __name__ == '__main__':
         except KeyboardInterrupt:
             print('Force shutdown server')
             stop_event.set()
+        time.sleep(2)

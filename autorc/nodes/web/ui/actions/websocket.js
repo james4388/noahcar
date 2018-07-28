@@ -97,7 +97,6 @@ export function connect(wsUri, reconnect=false) {
 
 export function emit(action, data) {
     // Send data to server via websocket
-    console.log(ws)
     if (ws !== null) {
         ws.send(JSON.stringify({
             ...data,

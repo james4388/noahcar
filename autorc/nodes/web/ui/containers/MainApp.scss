@@ -3,6 +3,11 @@ html, body{
     width: 100%;
 }
 
+#main-container {
+    width: 100%;
+    height: 100%;
+}
+
 .main-app {
     height: 100%;
     width: 100%;
@@ -45,11 +50,12 @@ html, body{
     }
 
     .joystick-controller {
+        cursor: pointer;
         position: absolute;
         width: 100%;
         height: 100%;
         border: 1px solid green;
-        z-index: 999;  /* top most */
+        z-index: 999;  /* 2nd top most */
 
         .joystick-col {
             position: absolute;
@@ -71,6 +77,18 @@ html, body{
         .right {
             left: 50%;
             top: 0;
+        }
+    }
+
+    .action-buttons {
+        z-index: 1000; /* top most */
+        top: 0;
+        left: 0;
+        height: 50px;
+        position: absolute;
+
+        button {
+            margin-right: 1em;
         }
     }
 }

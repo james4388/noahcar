@@ -32,5 +32,5 @@ ReactDOM.render(
     <Provider store={store}>
         <MainApp />
     </Provider>,
-    document.body
+    document.getElementById('main-container')
 );
