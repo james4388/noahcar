@@ -65,8 +65,8 @@ if __name__ == '__main__':
     from autorc.nodes.web import WebController
     from autorc.nodes.recorder import SimpleRecorder
     noahcar = Vehicle()
-    noahcar.add(CVWebCam)
-    noahcar.add(WebController)
-    noahcar.add(Engine)
-    noahcar.add(SimpleRecorder)
+    noahcar.add_node(CVWebCam)
+    noahcar.add_node(WebController)
+    noahcar.add_node(Engine)
+    noahcar.add_node(SimpleRecorder)
     noahcar.start()
