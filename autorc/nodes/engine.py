@@ -25,7 +25,8 @@ class Engine(Node):
         self.bw = Back_Wheels()
 
     def shutdown(self):
-        self.pwm.frequency = 0  # Is it work?
+        pass
+        # TODO shutdown pwm
 
     def process_loop(self, *args):
         if self.input_updated(('pilot/steering', )):

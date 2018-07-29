@@ -12,4 +12,5 @@ cryptography
 pygame
 Pillow
 keras
+grpcio
 tensorflow

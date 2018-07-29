@@ -20,6 +20,7 @@ class Component(object):
         self._DEBUG = debug
 
     def log(self, msg, *args, **kwargs):
+        return  # Temporary suspress hardware log
         ''' Print debug info '''
         if self.logger:
             self.logger.info(msg, *args, **kwargs)
@@ -27,6 +28,7 @@ class Component(object):
             print(msg)
 
     def debug(self, msg, *args, **kwargs):
+        return  # Temporary suspress hardware log
         ''' Print debug info '''
         if self.logger:
             self.logger.debug(msg, *args, **kwargs)
