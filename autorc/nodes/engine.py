@@ -28,6 +28,11 @@ class Engine(Node):
         self.pwm.frequency = 0  # Is it work?
 
     def process_loop(self, *args):
+        if self.input_updated(('pilot/steering', )):
+            steering_percent = self.context.get('pilot/steering', 0)
+            steering = range_map(
+                steering_percent, -1, 1, 70, 110, int_only=True)
+            self.fw.turn(steering)
         if self.input_updated(('user/steering', )):
             steering_percent = self.context.get('user/steering', 0)
             steering = range_map(

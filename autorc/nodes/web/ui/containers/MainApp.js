@@ -96,7 +96,7 @@ class MainApp extends Component {
     }
 
     render() {
-        const { notifications, chat, actions } = this.props;
+        const { notifications, chat, actions, vehicle } = this.props;
         const {
             steering, throttle, fullscreenEnable, fullscreen, recordEnable,
             autoPilot
@@ -113,7 +113,10 @@ class MainApp extends Component {
                 <img src="/static/images/steeringwheel.png" style={{transform: `rotate(${steering}deg)`}} alt="☺"/>
             </div>
             <div className="stats">
-                Stats. Speed: {throttle}. Steer: {steering}.<br/>
+                User Speed: {throttle}.
+                Steer: {steering}.<br/ >
+                Pilot Speed: { vehicle.get('pilot/throttle') }.
+                Steer: { vehicle.get('pilot/steering') }
             </div>
             <JoystickController onThrottleChange={this.throttle} onSteeringChange={this.steer}/>
             <div className="action-buttons">
@@ -135,7 +138,8 @@ class MainApp extends Component {
 function mapStateToProps(state) {
     return {
         notifications: state.get('notifications'),
-        chat: state.get('chat')
+        chat: state.get('chat'),
+        vehicle: state.get('vehicle')
     }
 }
 

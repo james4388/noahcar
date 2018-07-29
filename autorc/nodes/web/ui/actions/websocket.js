@@ -14,10 +14,10 @@ function destroySocket() {
     ws = null;
 }
 
-function tryToReconnect(dispatch, getState) {
+function tryToReconnect(wsUri, dispatch, getState) {
     const wsState = getState().get('ws') || new Map();
-    const reconnectAttemps = ws.get('reconnectAttemps');
-    const isServerShutdown = ws.get('serverShutdown');
+    const reconnectAttemps = wsState.get('reconnectAttemps');
+    const isServerShutdown = wsState.get('serverShutdown');
     if (!isServerShutdown && reconnectAttemps <=
             constants.WS_MAX_RECONNECT_ATTEMPS) {
         dispatch(connect(wsUri, true));
@@ -70,12 +70,14 @@ export function connect(wsUri, reconnect=false) {
         };
         // TODO handle websocket error https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
         ws.onclose = function(event) {
+            console.log('server close', event.code);
             switch (event.code) {   // Close code
                 case 1000:	// CLOSE_NORMAL
+                    dispatch(showNotification('Server is shutting down'));
         			dispatch({type: constants.SERVER_SHUTDOWN});
         			break;
                 default:	// Abnormal closure
-                    if (tryToReconnect()) {
+                    if (tryToReconnect(wsUri, dispatch, getState)) {
                         return;
                     }
     			    break;
@@ -85,7 +87,7 @@ export function connect(wsUri, reconnect=false) {
         ws.onerror = function(event) {
             switch (event.code) {
                 case 'ECONNREFUSED':
-                    if (tryToReconnect()) {
+                    if (tryToReconnect(wsUri, dispatch, getState)) {
                         return;
                     }
         			break;

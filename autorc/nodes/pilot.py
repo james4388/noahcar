@@ -92,5 +92,5 @@ class KerasSteeringPilot(PilotBase):
     def predict(self, image):
         if self.model is not None:
             return self.decode_label(
-                self.model.predict(np.array(image))
+                self.model.predict(np.array([image]))
             )

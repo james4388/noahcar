@@ -54,7 +54,7 @@ class SocketController(object):
         logger.debug('Notify server closing to all sockets')
         for user in list(self.app[self.USERS].values()):
             await user['ws'].close(
-                code=1012, message='Server is shutting down')
+                code=1000, message='Server is shutting down')
 
     def user_json(self, user):
         ''' Return filtered user to json encoder '''
@@ -257,6 +257,10 @@ class WebController(AsyncNode):
             })
         except Exception:
             pass
+
+    async def shutdown(self):
+        await self.socket.on_shutdown()
+        await super(WebController, self).shutdown()
 
     async def start_up(self):
         app = web.Application(logger=self.logger)

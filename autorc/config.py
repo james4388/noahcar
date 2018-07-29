@@ -45,6 +45,7 @@ SESSION_KEY = 'session_key'
 
 # Training set location
 TRAINING_SET_ROOT = os.path.join(BASE_DIR, 'training-set')
+MODELS_ROOT = os.path.join(BASE_DIR, 'models')
 # ========== END DEFAULT CONFIG ===============
 
 
