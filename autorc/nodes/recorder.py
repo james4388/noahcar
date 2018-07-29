@@ -52,7 +52,7 @@ class SimpleRecorder(BaseRecorder):
 
         with open(file_path + '.json', 'w') as f:
             json.dump({
-                'image': file_path + '.jpg',
+                'image': file_name + '.jpg',
                 'steering': steering,
                 'throttle': throttle
             }, f)

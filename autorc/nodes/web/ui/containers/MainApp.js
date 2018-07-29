@@ -5,14 +5,15 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { clearNotification, showNotification } from 'actions/notification';
 import {
-    steering, throttle, startTrainingRecord, endTrainingRecord
+    steering, throttle, startTrainingRecord, endTrainingRecord,
+    startAutoPilot, endAutoPilot
 } from 'actions/vehicle';
 import { sendMessage } from 'actions/chat';
 import Notification from 'components/Notification';
 import JoystickController from 'components/JoystickController';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    faExpand, faCompress, faVideo, faVideoSlash
+    faExpand, faCompress, faVideo, faVideoSlash, faMagic, faTaxi, faLaptopCode
 } from '@fortawesome/free-solid-svg-icons';
 
 require('./MainApp.scss');
@@ -25,7 +26,8 @@ class MainApp extends Component {
             throttle: 0,
             fullscreen: false,
             fullscreenEnable: screenfull.enabled,
-            recordEnable: false
+            recordEnable: false,
+            autoPilot: false,
         }
 
         this.steer = this.steer.bind(this);
@@ -33,6 +35,7 @@ class MainApp extends Component {
         this.toggleFullScreen = this.toggleFullScreen.bind(this);
         this.onFullScreenChange = this.onFullScreenChange.bind(this);
         this.onRecordChange = this.onRecordChange.bind(this);
+        this.onAutopilotChange = this.onAutopilotChange.bind(this);
     }
 
     componentDidMount() {
@@ -53,6 +56,21 @@ class MainApp extends Component {
                 this.props.actions.vehicle.startTrainingRecord();
             } else {
                 this.props.actions.vehicle.endTrainingRecord();
+            }
+        });
+    }
+
+    onAutopilotChange() {
+        this.setState({
+            autoPilot: !this.state.autoPilot
+        }, () => {
+            if (this.state.autoPilot) {
+                this.props.actions.notifications.showNotification(
+                    'Autopilot is engage', 'info', 2000
+                );
+                this.props.actions.vehicle.startAutoPilot();
+            } else {
+                this.props.actions.vehicle.endAutoPilot();
             }
         });
     }
@@ -80,7 +98,8 @@ class MainApp extends Component {
     render() {
         const { notifications, chat, actions } = this.props;
         const {
-            steering, throttle, fullscreenEnable, fullscreen, recordEnable
+            steering, throttle, fullscreenEnable, fullscreen, recordEnable,
+            autoPilot
         } = this.state;
         return <div className="main-app" ref={el => this.el = el}>
             <Notification
@@ -104,6 +123,10 @@ class MainApp extends Component {
                 <button onClick={this.onRecordChange} title="Record on run">
                     <FontAwesomeIcon size="3x" icon={recordEnable ? faVideoSlash : faVideo } />
                 </button>
+                <button title="Autopilot" onClick={this.onAutopilotChange}>
+                    <FontAwesomeIcon size="3x" icon={faMagic} color={
+                        autoPilot ? 'red' : 'black' }/>
+                </button>
             </div>
         </div>
     }
@@ -125,7 +148,8 @@ function mapDispatchToProps(dispatch) {
             }, dispatch),
             'chat': bindActionCreators({sendMessage}, dispatch),
             'vehicle': bindActionCreators({
-                steering, throttle, startTrainingRecord, endTrainingRecord
+                steering, throttle, startTrainingRecord, endTrainingRecord,
+                startAutoPilot, endAutoPilot
             }, dispatch)
         }
     }

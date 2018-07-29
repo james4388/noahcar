@@ -12,14 +12,11 @@ class BaseWebCam(Node):
 
     def __init__(self, context,
                  outputs=('cam/image-jpeg', 'cam/image-np'),
-                 size=(160, 120), framerate=20,
-                 numpy_size=(160, 120), **kwargs):
+                 size=(160, 120), framerate=20, **kwargs):
         '''
             size for raw record and jpeg stream size
-            numpy_size size of array for deep learning
         '''
         self.size = size
-        self.numpy_size = numpy_size
         super(BaseWebCam, self).__init__(
             context, outputs=outputs,
             process_rate=framerate, **kwargs)
@@ -47,10 +44,10 @@ class CVWebCam(BaseWebCam):
     cam = None      # open CV cam instance
 
     def __init__(self, context, size=(160, 120), framerate=20,
-                 numpy_size=(160, 120), capture_device=0, jpeg_quality=90,
+                 capture_device=0, jpeg_quality=90,
                  use_rgb=True, **kwargs):
         super(CVWebCam, self).__init__(context, size=size, framerate=framerate,
-                                       numpy_size=numpy_size, **kwargs)
+                                       **kwargs)
         self.use_rgb = use_rgb
         self.framerate = framerate
         self.capture_device = capture_device
@@ -60,7 +57,7 @@ class CVWebCam(BaseWebCam):
         import cv2
         self.cv2 = cv2
         self.cam = cv2.VideoCapture(self.capture_device)
-        if self.size:
+        if self.size:   # Not working or camera is not supported
             self.cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.size[0])
             self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.size[1])
         self.encode_param = (int(cv2.IMWRITE_JPEG_QUALITY), self.jpeg_quality)
@@ -78,10 +75,10 @@ class CVWebCam(BaseWebCam):
 
     def get_np_array(self, frame):
         new_frame = frame
-        if self.size and self.size != self.numpy_size:
+        if self.size:
             # Resize
             new_frame = self.cv2.resize(
-                frame, self.numpy_size, self.cv2.INTER_LINEAR)
+                frame, self.size, self.cv2.INTER_LINEAR)
         if self.use_rgb:
             new_frame = self.cv2.cvtColor(new_frame, self.cv2.COLOR_BGR2RGB)
         return new_frame
@@ -96,10 +93,10 @@ class PGWebCam(BaseWebCam):
         USB webcam interface using Pygame
     '''
     def __init__(self, context, size=(160, 120), framerate=20,
-                 numpy_size=(160, 120), capture_device=None, jpeg_quality=90,
+                 capture_device=None, jpeg_quality=90,
                  use_bgr=False, **kwargs):
         super(PGWebCam, self).__init__(context, size=size, framerate=framerate,
-                                       numpy_size=numpy_size, **kwargs)
+                                       **kwargs)
         self.use_bgr = use_bgr
         self.framerate = framerate
         self.capture_device = capture_device
@@ -148,7 +145,7 @@ class PGWebCam(BaseWebCam):
             return tmpfile.getvalue()
 
     def get_np_array(self, frame):
-        scaled = self.pygame.transform.scale(self.surface, self.numpy_size)
+        scaled = self.pygame.transform.scale(self.surface, self.size)
         return self.pygame.surfarray.pixels3d(scaled)
 
     def shutdown(self):

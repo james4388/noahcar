@@ -1,4 +1,3 @@
-import asyncio
 from aiohttp import web, WSMsgType, WSCloseCode
 import aiohttp_jinja2
 import logging
@@ -10,7 +9,6 @@ from aiohttp_session import get_session, setup as setup_session
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 from autorc.config import config, Config
-from autorc.utils import range_map
 from autorc.nodes import AsyncNode
 from autorc.nodes.mjpeg import MjpegStreamer
 
@@ -39,8 +37,10 @@ class SocketController(object):
     USERS = 'ws_ctlr_user'
     _counter = 0    # Connection counter
 
-    def __init__(self, app: web.Application, update_context: None):
+    def __init__(self, app: web.Application, update_context: None,
+                 logger=None):
         self.app = app
+        self.logger = logger or logging.getLogger(__name__)
         if callable(update_context):
             self.update_context = update_context
         else:
@@ -130,6 +130,7 @@ class SocketController(object):
         return user
 
     async def on_message(self, user, msg):
+        # TODO rewrite this to call Node's method to controll inputs, outputs
         if msg.type == WSMsgType.TEXT:
             try:
                 data = json.loads(msg.data)
@@ -177,11 +178,17 @@ class SocketController(object):
                 throttle_percent = data.get('value', 0)
                 self.update_context('user/throttle', throttle_percent)
             elif action == CONSTANTS.TRAINING_RECORD_START:
-                print('You are on cam. smile')
+                self.logger.info('You are on cam. smile')
                 self.update_context('training/record', True)
             elif action == CONSTANTS.TRAINING_RECORD_END:
-                print('Done')
+                self.logger.info('Done')
                 self.update_context('training/record', False)
+            elif action == CONSTANTS.PILOT_ENGAGE_START:
+                self.logger.info('Auto pilot is on')
+                self.update_context('pilot/engage', True)
+            elif action == CONSTANTS.PILOT_ENGAGE_END:
+                self.logger.info('Auto pilot is off')
+                self.update_context('pilot/engage', False)
 
     async def handler(self, request):
         ws = web.WebSocketResponse(heartbeat=1.0, timeout=1.0, autoping=True,
@@ -226,7 +233,8 @@ class WebController(AsyncNode):
 
     def config_router(self, router, app):
         views = StaticViews()
-        sc = SocketController(app, update_context=self.update)
+        sc = SocketController(app, update_context=self.update,
+                              logger=self.logger)
         self.socket = sc
         mjpeg = MjpegStreamer(self.context, frame_rate=self.mjpeg_frame_rate)
         self.sc = sc

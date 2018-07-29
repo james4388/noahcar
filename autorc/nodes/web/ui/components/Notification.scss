@@ -13,8 +13,13 @@
     }
 
     .noti-list {
-        width: 100%;
+        width: 70%;
         position: absolute;
+        right: 0;
+        top: 0;
+        z-index: 999999999;     /* I dont care */
+        background: yellow;
+        opacity: 0.6;
         list-style: none;
         padding-left: 0;
     }

@@ -1,4 +1,5 @@
 import time
+import signal
 import logging
 from multiprocessing import Process, Manager
 
@@ -29,6 +30,8 @@ class Vehicle(object):
 
     def start(self):
         ''' Start the vehicle '''
+        #
+        original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
 
         # Start up nodes process
         with Manager() as manager:
@@ -46,6 +49,7 @@ class Vehicle(object):
                 p.start()
 
             # Begin main vehicle loop?
+            signal.signal(signal.SIGINT, original_sigint_handler)
             print('Engine started! (Press CTRL+C to quit)')
             self.main_loop()
             self.stop_event.set()

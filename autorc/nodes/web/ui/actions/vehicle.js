@@ -28,3 +28,17 @@ export function endTrainingRecord() {
         emit(constants.TRAINING_RECORD_END, {});
     }
 }
+
+export function startAutoPilot() {
+    return (dispatch, getState, {emit}) => {
+        console.log('Start Autopilot');
+        emit(constants.PILOT_ENGAGE_START, {});
+    }
+}
+
+export function endAutoPilot() {
+    return (dispatch, getState, {emit}) => {
+        console.log('End Autopilot');
+        emit(constants.PILOT_ENGAGE_END, {});
+    }
+}

@@ -11,3 +11,4 @@ aiohttp_session[secure]
 cryptography
 pygame
 Pillow
+keras
