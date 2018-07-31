@@ -18,7 +18,7 @@ class Vehicle(object):
         Node can subcribe to channels
     '''
     def __init__(self, name='NoahCar', loglevel=logging.DEBUG,
-                 allow_remote=False, address='', port=9999,
+                 allow_remote=True, address='', port=9999,
                  authkey: bytes=None):
         self.processes = []
         logging.basicConfig(
@@ -146,14 +146,14 @@ class RemoteVehicle(Vehicle):
 
 if __name__ == '__main__':
     from autorc.nodes.camera import CVWebCam  # PGWebCam  #
-    # from autorc.nodes.engine import Engine
+    from autorc.nodes.engine import Engine
     from autorc.nodes.web import WebController
     from autorc.nodes.recorder import SimpleRecorder
     from autorc.nodes.pilot import KerasSteeringPilot
     noahcar = Vehicle()
     noahcar.add_node(CVWebCam)
     noahcar.add_node(WebController)
-    # noahcar.add_node(Engine)
+    noahcar.add_node(Engine)
     noahcar.add_node(SimpleRecorder)
     noahcar.add_node(
         KerasSteeringPilot,
