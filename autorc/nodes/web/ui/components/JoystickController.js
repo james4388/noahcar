@@ -20,6 +20,7 @@ export default class JoystickController extends PureComponent {
             steeringInControl: false
         };
         this.updateHandle = null;
+        this.steeringDecelerateHandle = null;
 
         this.throttleOptions = new Map({
             lockY: true, color: 'red', size: props.size});
@@ -32,6 +33,28 @@ export default class JoystickController extends PureComponent {
         this.throttleChange = this.throttleChange.bind(this);
         this.steeringChange = this.steeringChange.bind(this);
         this.updateControl = this.updateControl.bind(this);
+        this.steeringDecelerate = this.steeringDecelerate.bind(this);
+        this.startSteeringDecelerate = this.startSteeringDecelerate.bind(this);
+    }
+
+    startSteeringDecelerate() {
+        const { steeringDecelerateDelay, steeringDecelerate } = this.props;
+        this.updateControl('steering');
+        this.steeringDecelerateHandle = setTimeout(
+            this.steeringDecelerate, steeringDecelerateDelay);
+    }
+
+    steeringDecelerate() {
+        const { steering } = this.state;
+        const { steeringDecelerateDelay, steeringDecelerate } = this.props;
+        if (Math.abs(steering) - steeringDecelerate > 0) {
+            this.setState({
+                steering: steering > 0 ? steering - steeringDecelerate : steering + steeringDecelerate
+            }, this.startSteeringDecelerate);
+        } else {
+            this.setState({steering: 0});
+            this.updateControl('steering');
+        }
     }
 
     inControlChange(ctl, inControl) {
@@ -39,9 +62,19 @@ export default class JoystickController extends PureComponent {
         let newState = {
             [`${ctl}InControl`]: inControl
         };
-        if (!inControl) {
-            newState[ctl] = 0;
+
+        if (!inControl) {   // Decelerate instead of hard 0
+            if (ctl === 'steering') {
+                this.startSteeringDecelerate();
+            } else {
+                newState['throttle'] = 0
+            }
+        } else {
+            if (ctl === 'steering') {
+                clearTimeout(this.steeringDecelerateHandle);
+            }
         }
+
         this.setState(newState, () => {
             const { throttleInControl, steeringInControl } = this.state;
             if (!throttleInControl && !steeringInControl) {
@@ -75,7 +108,8 @@ export default class JoystickController extends PureComponent {
     }
 
     convertJoystickValue(joystick, positiveDir) {
-        if (joystick.direction) {
+        const {steeringZeroThreshold} = this.props;
+        if (joystick.force > steeringZeroThreshold && joystick.direction) {
             const { direction } = joystick;
             const sign = (
                 direction.y === positiveDir || direction.x === positiveDir
@@ -129,10 +163,15 @@ JoystickController.propTypes = {
     updateDelay: PropTypes.number,
     size: PropTypes.number,             // Joystick size
     onThrottleChange: PropTypes.func,
-    onSteeringChange: PropTypes.func
+    onSteeringChange: PropTypes.func,
+    steeringZeroThreshold: PropTypes.number,
+    steeringDecelerate: PropTypes.number
 }
 
 JoystickController.defaultProps = {
     updateDelay: 100,
     size: 150,
+    steeringZeroThreshold: 0.05,  // < this mean zero steering
+    steeringDecelerate: 0.1,      // Percent
+    steeringDecelerateDelay: 50
 }
