@@ -13,3 +13,20 @@ Inspired by Robot Operating System ([ROS](http://www.ros.org/)) each components 
 ![PiCar](./docs/assets/noaharch.png)
 
 Current implementation using Python's built in multiprocessing manager that allow sharing objects, data between Processes. Pros: Utilize CPU cores, avoid PIL, run nodes over network from different machine. Cons: Data are being pickle/unpickle multiple time and send over network which is slower than thread. May consider using more decend message queue like Redis.
+
+## Requirement
+- Raspberry Model 2/3 or greater
+- Python 3.5
+- OpenCV (optional) or PyGame camera (just for capture video)
+- SD card 8gb or more
+- Car kit (robot HAT, mortor controller... mine just use picar)
+- Webcam or Picamera
+
+## Documents
+1. Setup Hardware
+  - Raspberry Pi setup
+  - Car setup
+2. Setup software
+3. Run, record
+4. Training
+5. Autopilot
