@@ -45,6 +45,7 @@ class BaseRecorder(AsyncNode):
 class SimpleRecorder(BaseRecorder):
     async def write(self, image, steering, throttle):
         # TODO calculate file name format here
+        # TODO save image as numpy array instead
         file_name = 'frame-%d-%s' % (self.counter, time.time())
         file_path = os.path.join(self.record_path, file_name)
         with open(file_path + '.jpg', 'wb') as f:

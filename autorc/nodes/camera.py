@@ -1,6 +1,7 @@
 from io import BytesIO
 import time
 from autorc.nodes import Node
+import numpy as np
 
 '''
     Supported resolution
@@ -146,11 +147,14 @@ class PGWebCam(BaseWebCam):
         if self.cam and self.cam.query_image():
             self.surface = self.cam.get_image(self.blank_surface)
             # Since pygame cam switch width and height, we have to flip back
-            self.surface = self.pygame.transform.rotate(
-                self.pygame.transform.flip(self.surface, True, False), 90)
+            # self.surface = self.pygame.transform.rotate(
+            # self.pygame.transform.flip(self.surface, True, False), 90)
             # need resize?
             # pygame.transform.scale(self.surface, self.size)
-            return self.pygame.surfarray.pixels3d(self.surface)
+            frame = self.pygame.surfarray.pixels3d(self.surface)
+            # Since numpy rotate image 90 degree, need to use numpy to
+            # image transpose back
+            return np.transpose(frame, (1, 0, 2))   # HxWxC
 
     def get_jpeg(self, frame):
         if frame is not None:
@@ -160,9 +164,9 @@ class PGWebCam(BaseWebCam):
             return tmpfile.getvalue()
 
     def get_np_array(self, frame):
-        scaled = self.pygame.transform.scale(self.surface, self.numpy_size)
+        # scaled = self.pygame.transform.scale(self.surface, self.numpy_size)
         # HxWxD
-        return self.pygame.surfarray.pixels3d(scaled)
+        return frame
 
     def shutdown(self):
         if self.cam:
