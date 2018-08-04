@@ -162,7 +162,7 @@ class PGWebCam(BaseWebCam):
     def get_np_array(self, frame):
         scaled = self.pygame.transform.scale(self.surface, self.numpy_size)
         # HxWxD
-        return self.pygame.surfarray.pixels3d(scaled).transpose(1, 0, 2)
+        return self.pygame.surfarray.pixels3d(scaled)
 
     def shutdown(self):
         if self.cam:
