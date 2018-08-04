@@ -145,13 +145,13 @@ class RemoteVehicle(Vehicle):
 
 
 if __name__ == '__main__':
-    from autorc.nodes.camera import PGWebCam  # CVWebCam
+    from autorc.nodes.camera import CVWebCam  # , PGWebCam
     # from autorc.nodes.engine import Engine
     from autorc.nodes.web import WebController
     # from autorc.nodes.recorder import SimpleRecorder
     # from autorc.nodes.pilot import KerasSteeringPilot
     noahcar = Vehicle()
-    noahcar.add_node(PGWebCam, size=(320, 240), numpy_size=(240, 240))
+    noahcar.add_node(CVWebCam, size=(320, 240), numpy_size=(240, 240))
     noahcar.add_node(WebController)
     # noahcar.add_node(Engine)
     # noahcar.add_node(SimpleRecorder)
