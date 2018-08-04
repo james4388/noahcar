@@ -8,7 +8,7 @@ from autorc.picar3.hardware.back_wheels import Back_Wheels
 
 
 class Engine(Node):
-    def __init__(self, context, process_rate=50, **kwargs):
+    def __init__(self, context, process_rate=60, **kwargs):
         # Error in process_loop, no output, no run
         super(Engine, self).__init__(context, process_rate=process_rate,
                                      **kwargs)

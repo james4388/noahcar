@@ -12,11 +12,16 @@ class BaseWebCam(Node):
 
     def __init__(self, context,
                  outputs=('cam/image-jpeg', 'cam/image-np'),
-                 size=(160, 120), framerate=20, **kwargs):
+                 size=(160, 120), numpy_size=None,
+                 framerate=20, **kwargs):
         '''
             size for raw record and jpeg stream size
         '''
+        numpy_size = numpy_size or size
         self.size = size
+        if size[0] < numpy_size[0] or size[1] < numpy_size[1]:
+            raise Exception('Capture size must larger than numpy size')
+        self.numpy_size = numpy_size
         super(BaseWebCam, self).__init__(
             context, outputs=outputs,
             process_rate=framerate, **kwargs)
@@ -75,10 +80,9 @@ class CVWebCam(BaseWebCam):
 
     def get_np_array(self, frame):
         new_frame = frame
-        if self.size:
-            # Resize
+        if self.numpy_size and self.numpy_size != self.size:
             new_frame = self.cv2.resize(
-                frame, self.size, self.cv2.INTER_LINEAR)
+                frame, self.numpy_size, self.cv2.INTER_LINEAR)
         if self.use_rgb:
             new_frame = self.cv2.cvtColor(new_frame, self.cv2.COLOR_BGR2RGB)
         return new_frame
@@ -145,7 +149,7 @@ class PGWebCam(BaseWebCam):
             return tmpfile.getvalue()
 
     def get_np_array(self, frame):
-        scaled = self.pygame.transform.scale(self.surface, self.size)
+        scaled = self.pygame.transform.scale(self.surface, self.numpy_size)
         # HxWxD
         return self.pygame.surfarray.pixels3d(scaled).transpose(1, 0, 2)
 

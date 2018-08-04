@@ -146,16 +146,16 @@ class RemoteVehicle(Vehicle):
 
 if __name__ == '__main__':
     from autorc.nodes.camera import CVWebCam  # PGWebCam  #
-    from autorc.nodes.engine import Engine
+    # from autorc.nodes.engine import Engine
     from autorc.nodes.web import WebController
-    from autorc.nodes.recorder import SimpleRecorder
-    from autorc.nodes.pilot import KerasSteeringPilot
+    # from autorc.nodes.recorder import SimpleRecorder
+    # from autorc.nodes.pilot import KerasSteeringPilot
     noahcar = Vehicle()
-    noahcar.add_node(CVWebCam)
+    noahcar.add_node(CVWebCam, size=(214, 160), numpy_size=(160, 160))
     noahcar.add_node(WebController)
-    noahcar.add_node(Engine)
-    noahcar.add_node(SimpleRecorder)
-    noahcar.add_node(
+    # noahcar.add_node(Engine)
+    # noahcar.add_node(SimpleRecorder)
+    '''noahcar.add_node(
         KerasSteeringPilot,
-        model_path=os.path.join(config.MODELS_ROOT, 'donkey2.mdl'))
+        model_path=os.path.join(config.MODELS_ROOT, 'donkey2.mdl'))'''
     noahcar.start()
