@@ -151,7 +151,7 @@ if __name__ == '__main__':
     # from autorc.nodes.recorder import SimpleRecorder
     # from autorc.nodes.pilot import KerasSteeringPilot
     noahcar = Vehicle()
-    noahcar.add_node(CVWebCam, size=(214, 160), numpy_size=(160, 160))
+    noahcar.add_node(CVWebCam, size=(320, 240), numpy_size=(240, 240))
     noahcar.add_node(WebController)
     # noahcar.add_node(Engine)
     # noahcar.add_node(SimpleRecorder)

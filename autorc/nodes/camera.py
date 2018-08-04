@@ -2,6 +2,17 @@ from io import BytesIO
 import time
 from autorc.nodes import Node
 
+'''
+    Supported resolution
+    160.0 x 120.0
+    176.0 x 144.0
+    320.0 x 240.0
+    352.0 x 288.0
+    640.0 x 480.0
+    1024.0 x 768.0
+    1280.0 x 1024.0
+'''
+
 
 class BaseWebCam(Node):
     '''
