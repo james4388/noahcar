@@ -2,6 +2,7 @@ from io import BytesIO
 import time
 from autorc.nodes import Node
 import numpy as np
+from skimage.transform import resize as skresize
 
 '''
     Supported resolution
@@ -19,7 +20,9 @@ class BaseWebCam(Node):
     '''
         USB webcam interface, get image from camera and update:
             jpeg for client streaming
-            numpy image array for deep learning
+            size=(width, height): Camera caoture size, also the size
+                                  of jpeg frame
+            numpy_size: (height, width) image array for deep learning
     '''
 
     def __init__(self, context,
@@ -29,9 +32,9 @@ class BaseWebCam(Node):
         '''
             size for raw record and jpeg stream size
         '''
-        numpy_size = numpy_size or size
         self.size = size
-        if size[0] < numpy_size[0] or size[1] < numpy_size[1]:
+        if (isinstance(numpy_size, (tuple, list)) and
+                size[0] < numpy_size[1] or size[1] < numpy_size[0]):
             raise Exception('Capture size must larger than numpy size')
         self.numpy_size = numpy_size
         super(BaseWebCam, self).__init__(
@@ -92,9 +95,11 @@ class CVWebCam(BaseWebCam):
 
     def get_np_array(self, frame):
         new_frame = frame
-        if self.numpy_size and self.numpy_size != self.size:
+        if self.numpy_size:
+            # CV resize use col, row (width, height)
             new_frame = self.cv2.resize(
-                frame, self.numpy_size, self.cv2.INTER_LINEAR)
+                frame, (self.numpy_size[1], self.numpy_size[0]),
+                self.cv2.INTER_LINEAR)
         if self.use_rgb:
             new_frame = self.cv2.cvtColor(new_frame, self.cv2.COLOR_BGR2RGB)
         return new_frame
@@ -164,8 +169,10 @@ class PGWebCam(BaseWebCam):
             return tmpfile.getvalue()
 
     def get_np_array(self, frame):
-        # scaled = self.pygame.transform.scale(self.surface, self.numpy_size)
-        # HxWxD
+        if self.size != self.numpy_size:
+            # HxWxD
+            return skresize(frame, self.numpy_size, mode='reflect',
+                            anti_aliasing=False)
         return frame
 
     def shutdown(self):
