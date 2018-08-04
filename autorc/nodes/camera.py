@@ -29,17 +29,20 @@ class BaseWebCam(Node):
                  outputs=('cam/image-jpeg', 'cam/image-np'),
                  size=(160, 120), numpy_size=None,
                  framerate=20, **kwargs):
-        '''
-            size for raw record and jpeg stream size
-        '''
+        super(BaseWebCam, self).__init__(
+            context, outputs=outputs,
+            process_rate=framerate, **kwargs)
+
         self.size = size
         if (isinstance(numpy_size, (tuple, list)) and
                 size[0] < numpy_size[1] or size[1] < numpy_size[0]):
             raise Exception('Capture size must larger than numpy size')
+        if (isinstance(numpy_size, (tuple, list)) and
+                numpy_size[0] > numpy_size[1]):
+            self.logger.warn(
+                'numpy_size(height, width) or (rows, cols): First index '
+                'should smaller or equal second index')
         self.numpy_size = numpy_size
-        super(BaseWebCam, self).__init__(
-            context, outputs=outputs,
-            process_rate=framerate, **kwargs)
 
     def get_frame(self):
         raise Exception('Not yet implemented')
