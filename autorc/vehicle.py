@@ -148,14 +148,14 @@ if __name__ == '__main__':
     from autorc.nodes.camera import CVWebCam  # , PGWebCam
     from autorc.nodes.engine import Engine
     from autorc.nodes.web import WebController
-    from autorc.nodes.recorder import NPRecorder
+    from autorc.nodes.recorder import SimpleRecorder
     # from autorc.nodes.pilot import KerasSteeringPilot
     noahcar = Vehicle()
-    noahcar.add_node(CVWebCam, size=(320, 240), jpeg_size=(160, 120),
+    noahcar.add_node(CVWebCam, size=(320, 240), jpeg_size=(160, 160),
                      numpy_size=(160, 160))
     noahcar.add_node(WebController)
     noahcar.add_node(Engine)
-    noahcar.add_node(NPRecorder)
+    noahcar.add_node(SimpleRecorder)
     '''noahcar.add_node(
         KerasSteeringPilot,
         model_path=os.path.join(config.MODELS_ROOT, 'donkey2.mdl'))'''
