@@ -2,6 +2,7 @@ import os
 import uuid
 import json
 import time
+import numpy as np
 
 from autorc.nodes import AsyncNode
 from autorc.config import config
@@ -54,6 +55,23 @@ class SimpleRecorder(BaseRecorder):
         with open(file_path + '.json', 'w') as f:
             json.dump({
                 'image': file_name + '.jpg',
+                'steering': steering,
+                'throttle': throttle
+            }, f)
+
+
+class NPRecorder(BaseRecorder):
+    async def write(self, image, steering, throttle):
+        # TODO calculate file name format here
+        # TODO save image as numpy array instead
+        file_name = 'frame-%d-%s' % (self.counter, time.time())
+        file_path = os.path.join(self.record_path, file_name)
+        with open(file_path + '.npz', 'wb') as f:
+            f.write(image)
+
+        with open(file_path + '.json', 'w') as f:
+            json.dump({
+                'image': file_name + '.npz',
                 'steering': steering,
                 'throttle': throttle
             }, f)
