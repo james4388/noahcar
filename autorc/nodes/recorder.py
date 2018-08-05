@@ -61,6 +61,11 @@ class SimpleRecorder(BaseRecorder):
 
 
 class NPRecorder(BaseRecorder):
+    def __init__(self, context, *,
+                 inputs=('cam/image-np', 'user/steering', 'user/throttle'),
+                 **kwargs):
+        super(NPRecorder, self).__init__(context, inputs=inputs, **kwargs)
+
     async def write(self, image, steering, throttle):
         # TODO calculate file name format here
         # TODO save image as numpy array instead
