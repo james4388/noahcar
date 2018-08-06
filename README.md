@@ -14,9 +14,13 @@ Inspired by Robot Operating System ([ROS](http://www.ros.org/)) each components 
 
 Current implementation using Python's built in multiprocessing manager that allow sharing objects, data between Processes. Pros: Utilize CPU cores, avoid PIL, run nodes over network from different machine. Cons: Data are being pickle/unpickle multiple time and send over network which is slower than thread. May consider using more decend message queue like Redis.
 
+## Images
+
 ![First attempt](/docs/assets/noahcar-firsttry.gif)  |  [![Second attempt](/docs/assets/noahcar2ndtry.gif)](https://www.youtube.com/watch?v=BVkJ1vlqxoQ "Self driving car 2nd attempt")
 :-------------------------:|:-------------------------:
 Paper road            |  Duct tape border
+
+![Control UI](/docs/assets/control-ui.png)
 
 ## Requirement
 - Raspberry Model 2/3 or greater
