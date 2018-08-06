@@ -16,7 +16,7 @@ Current implementation using Python's built in multiprocessing manager that allo
 
 ![First attempt](/docs/assets/noahcar-firsttry.gif)  |  [![Second attempt](/docs/assets/noahcar2ndtry.gif)](https://www.youtube.com/watch?v=BVkJ1vlqxoQ "Self driving car 2nd attempt")
 :-------------------------:|:-------------------------:
-First Attempt            |  Second Attempt
+Paper road            |  Duct tape border
 
 ## Requirement
 - Raspberry Model 2/3 or greater
