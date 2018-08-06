@@ -28,7 +28,7 @@ Current implementation using Python's built in multiprocessing manager that allo
 1. Setup Hardware
   - [Raspberry Pi setup](/docs/rasp-setup.md)
   - [Car setup](/docs/car-setup.md)
-2. Setup software
+2. [Setup software](/docs/software-setup.md)
 3. Run, record
 4. Training
 5. Autopilot
