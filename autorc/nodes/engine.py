@@ -2,9 +2,9 @@ from autorc.nodes import Node
 from autorc.config import config
 from autorc.utils import range_map
 
-from autorc.picar3.hardware import PCA9685
-from autorc.picar3.hardware.front_wheels import Front_Wheels
-from autorc.picar3.hardware.back_wheels import Back_Wheels
+from autorc.picar3 import PCA9685
+from autorc.picar3.front_wheels import Front_Wheels
+from autorc.picar3.back_wheels import Back_Wheels
 
 
 class Engine(Node):

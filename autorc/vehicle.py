@@ -1,7 +1,6 @@
 import time
 import signal
 import logging
-import os
 from multiprocessing import Process
 import multiprocessing
 from multiprocessing.managers import SyncManager
@@ -81,7 +80,7 @@ class Vehicle(object):
             signal.signal(signal.SIGINT, original_sigint_handler)
             print('Engine started! (Press CTRL+C to quit)')
             if self.allow_remote:
-                print('Server: %s:%s' % (self.address, self.port))
+                print('Sync Server: %s:%s' % (self.address, self.port))
                 print('Auth:', self.authkey)
             self.main_loop()
             self.stop_event.set()
@@ -142,21 +141,3 @@ class RemoteVehicle(Vehicle):
             self.main_loop()
             self.stop_event.set()
             self.shutdown()
-
-
-if __name__ == '__main__':
-    from autorc.nodes.camera import CVWebCam  # , PGWebCam
-    from autorc.nodes.engine import Engine
-    from autorc.nodes.web import WebController
-    from autorc.nodes.recorder import SimpleRecorder
-    # from autorc.nodes.pilot import KerasSteeringPilot
-    noahcar = Vehicle()
-    noahcar.add_node(CVWebCam, size=(320, 240), jpeg_size=(160, 160),
-                     numpy_size=(160, 160))
-    noahcar.add_node(WebController)
-    noahcar.add_node(Engine)
-    noahcar.add_node(SimpleRecorder)
-    '''noahcar.add_node(
-        KerasSteeringPilot,
-        model_path=os.path.join(config.MODELS_ROOT, 'donkey2.mdl'))'''
-    noahcar.start()

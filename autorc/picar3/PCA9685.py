@@ -13,7 +13,7 @@ from __future__ import print_function
 import time
 import math
 
-from autorc.picar3.hardware.base import BusModule
+from autorc.picar3.base import BusModule
 
 
 class PWM(BusModule):

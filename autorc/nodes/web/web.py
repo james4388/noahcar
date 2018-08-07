@@ -281,6 +281,10 @@ class WebController(AsyncNode):
         await self.runner.setup()
         site = web.TCPSite(self.runner, host=self.host, port=self.port)
         await site.start()
+        print('=======================')
+        print('Web controller start!')
+        print('Navigate to:', 'http://%s:%s' % (self.host, self.port))
+        print('=======================')
 
     def collect_static(self):
         ''' Build static files for ui application (React) '''

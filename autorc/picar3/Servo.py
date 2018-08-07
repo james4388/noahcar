@@ -11,8 +11,8 @@
 **********************************************************************
 '''
 
-from autorc.picar3.hardware.base import Component
-from autorc.picar3.hardware import PCA9685
+from autorc.picar3.base import Component
+from autorc.picar3 import PCA9685
 
 
 class Servo(Component):

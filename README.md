@@ -38,3 +38,11 @@ Paper road            |  Duct tape border
 3. Run, record
 4. Training
 5. Autopilot
+
+
+## Run
+```
+cd noahcar
+. env/bin/activate
+python manage.py start
+```

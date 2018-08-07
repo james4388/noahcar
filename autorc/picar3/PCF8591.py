@@ -9,7 +9,7 @@
 * Update      : Dream    2016-09-19    New release
 **********************************************************************
 '''
-from autorc.picar3.hardware.base import BusModule
+from autorc.picar3.base import BusModule
 
 
 class PCF8591(BusModule):
