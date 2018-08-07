@@ -43,6 +43,7 @@ def start(args):
     if not hasattr(mod, 'vehicle'):
         print('Profile', profile, 'does not has vehicle instance')
     else:
+        print('Start', profile, 'vehicle.')
         getattr(mod, 'vehicle').start()
 
 
