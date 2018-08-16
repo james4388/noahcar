@@ -33,11 +33,12 @@ class PilotBase(Node):
 class KerasSteeringPilot(PilotBase):
     ''' Donkey based '''
     def __init__(self, context, model_path=None,
-                 input_shape=(160, 120, 3), **kwargs):
+                 input_shape=(160, 120, 3), preprocess_input=None, **kwargs):
         super(KerasSteeringPilot, self).__init__(context, **kwargs)
         self.model = None
         self.input_shape = input_shape
         self.model_path = model_path
+        self.preprocess_input = preprocess_input
         self.get_model(model_path)
 
     def get_model(self, model_path=None):
@@ -91,6 +92,9 @@ class KerasSteeringPilot(PilotBase):
 
     def predict(self, image):
         if self.model is not None:
+            inp = image
+            if self.preprocess_input:
+                inp = self.preprocess_input(image)
             return self.decode_label(
-                self.model.predict(np.array([image]))
+                self.model.predict(np.array([inp]))
             )

@@ -37,6 +37,8 @@ Paper road            |  Duct tape border
 2. [Setup software](/docs/software-setup.md)
 3. Run, record
 4. Training
+  - Write new model
+  - [Transfer leaning](/docs/transfer.md)
 5. Autopilot
 
 
