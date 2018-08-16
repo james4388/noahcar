@@ -47,4 +47,6 @@ Paper road            |  Duct tape border
 cd noahcar
 . env/bin/activate
 python manage.py start
+# Or
+./manage.py -p <profile_name> start
 ```
