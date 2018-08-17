@@ -16,5 +16,6 @@ vehicle.add_node(Engine)
 vehicle.add_node(SimpleRecorder)
 vehicle.add_node(
     KerasSteeringPilot, camera_feed='cam/image-jpeg', camera_feed_jpeg=True,
+    input_shape=(160, 160, 3),
     model_path=os.path.join(config.MODELS_ROOT, 'donkey2-lines.mdl'),
     prewarm_model=True)
