@@ -322,3 +322,5 @@ Using transfer learning, you can utilize a lot of useful feature from award wini
     Non-trainable params: 34,112
 
 ![Model](/docs/assets/mobilenetv2.png)
+
+After testing this model still seem slow in raspi, need to find another way

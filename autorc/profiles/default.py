@@ -16,4 +16,4 @@ vehicle.add_node(Engine)
 vehicle.add_node(SimpleRecorder)
 vehicle.add_node(
     KerasSteeringPilot,
-    model_path=os.path.join(config.MODELS_ROOT, 'donkey2.mdl'))
+    model_path=os.path.join(config.MODELS_ROOT, 'donkey2-lines.mdl'))

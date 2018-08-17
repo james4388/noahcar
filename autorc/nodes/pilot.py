@@ -96,6 +96,7 @@ class KerasSteeringPilot(PilotBase):
         if self.model is not None:
             inp = image
             if self.preprocess_input:
+                # np.asarray(img, dtype=backend.floatx())
                 inp = self.preprocess_input(image.astype(np.float32))
             return self.decode_label(
                 self.model.predict(np.array([inp]))
