@@ -1,6 +1,7 @@
 ''' Keras model for auto pilot '''
 import os
 import numpy as np
+from io import BytesIO
 
 from autorc.nodes import Node
 
@@ -33,13 +34,19 @@ class PilotBase(Node):
 class KerasSteeringPilot(PilotBase):
     ''' Donkey based '''
     def __init__(self, context, model_path=None,
-                 input_shape=(160, 120, 3), preprocess_input=None, **kwargs):
+                 input_shape=(160, 120, 3), preprocess_input=None,
+                 prewarm_model=False, camera_feed_jpeg=False, **kwargs):
         super(KerasSteeringPilot, self).__init__(context, **kwargs)
+        from keras.preprocessing.image import load_img, img_to_array
         self.model = None
         self.input_shape = input_shape
         self.model_path = model_path
         self.preprocess_input = preprocess_input
+        self.prewarm_model = prewarm_model
+        self.camera_feed_jpeg = camera_feed_jpeg
         self.get_model(model_path)
+        self.load_img = load_img
+        self.img_to_array = img_to_array
 
     def get_model(self, model_path=None):
         if model_path and os.path.isfile(model_path):
@@ -47,6 +54,11 @@ class KerasSteeringPilot(PilotBase):
             self.logger.info('Loading keras model %s' % model_path)
             self.model = load_model(model_path)
             self.logger.info('Model ready')
+            if self.prewarm_model:
+                self.logger.info('Prewarm model')
+                image = np.zeros((1, *self.input_shape))
+                self.model.predict(image)
+                self.logger.info('Model warmed')
         if self.model is None:
             from keras.models import Model
             from keras.layers import (
@@ -95,9 +107,12 @@ class KerasSteeringPilot(PilotBase):
     def predict(self, image):
         if self.model is not None:
             inp = image
+            if self.camera_feed_jpeg:
+                bytes = BytesIO(inp)
+                inp = self.load_img(bytes, target_size=self.input_shape[:-1])
             if self.preprocess_input:
                 # np.asarray(img, dtype=backend.floatx())
-                inp = self.preprocess_input(image.astype(np.float32))
+                inp = self.preprocess_input(inp.astype(np.float32))
             return self.decode_label(
                 self.model.predict(np.array([inp]))
             )

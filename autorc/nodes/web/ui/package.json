@@ -25,6 +25,7 @@
         "immutable": "^3.8.2",
         "nipplejs": "^0.7.1",
         "node-sass": "^4.9.0",
+        "npm": "^6.4.0",
         "react": "^16.4.1",
         "react-dom": "^16.4.1",
         "react-redux": "^5.0.7",

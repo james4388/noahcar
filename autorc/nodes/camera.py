@@ -29,12 +29,13 @@ class BaseWebCam(Node):
                  outputs=('cam/image-jpeg', 'cam/image-np'),
                  capture_size=(320, 240),
                  jpeg_size=(160, 120), numpy_size=None,
-                 framerate=20, **kwargs):
+                 framerate=20, disable_numpy_stream=False, **kwargs):
         super(BaseWebCam, self).__init__(
             context, outputs=outputs,
             process_rate=framerate, **kwargs)
         self.capture_size = capture_size
         self.jpeg_size = jpeg_size
+        self.disable_numpy_stream = disable_numpy_stream
         if (isinstance(jpeg_size, (tuple, list)) and
                 (capture_size[0] < jpeg_size[0] or
                     capture_size[1] < jpeg_size[1])):
@@ -63,7 +64,9 @@ class BaseWebCam(Node):
         frame = self.get_frame()
         if frame is not None:
             jpeg = self.get_jpeg(frame)
-            np_array = self.get_np_array(frame)
+            np_array = None
+            if not self.disable_numpy_stream:
+                np_array = self.get_np_array(frame)
             return jpeg, np_array
 
 
