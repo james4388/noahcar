@@ -44,7 +44,9 @@ class KerasSteeringPilot(PilotBase):
     def get_model(self, model_path=None):
         if model_path and os.path.isfile(model_path):
             from keras.models import load_model
+            self.logger.info('Loading keras model %s' % model_path)
             self.model = load_model(model_path)
+            self.logger.info('Model ready')
         if self.model is None:
             from keras.models import Model
             from keras.layers import (
@@ -94,7 +96,7 @@ class KerasSteeringPilot(PilotBase):
         if self.model is not None:
             inp = image
             if self.preprocess_input:
-                inp = self.preprocess_input(image)
+                inp = self.preprocess_input(image.astype(np.float32))
             return self.decode_label(
                 self.model.predict(np.array([inp]))
             )
