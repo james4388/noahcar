@@ -109,7 +109,8 @@ class KerasSteeringPilot(PilotBase):
             inp = image
             if self.camera_feed_jpeg:
                 bytes = BytesIO(inp)
-                inp = self.load_img(bytes, target_size=self.input_shape[:-1])
+                inp = self.img_to_array(
+                    self.load_img(bytes, target_size=self.input_shape[:-1]))
             if self.preprocess_input:
                 # np.asarray(img, dtype=backend.floatx())
                 inp = self.preprocess_input(inp.astype(np.float32))
