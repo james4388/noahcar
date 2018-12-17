@@ -37,7 +37,8 @@ Paper road            |  Duct tape border
 2. [Setup software](/docs/software-setup.md)
 3. Run, record
 4. Training
-  - Write new model
+  Hit record button while driving. A pair of image and json file including steering angle, speed will be produce for each frame. Record folder located at `noahcar/autorc/training-set/` copy to your PC for training.
+  - Write new model: [Noahcar.ipynb](/docs/Noahcar.ipynb)
   - [Transfer leaning](/docs/transfer.md)
 5. Autopilot
 
